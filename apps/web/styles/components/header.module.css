@@ -1,0 +1,50 @@
+.hdr {
+  border-bottom: 2px solid var(--ink);
+  padding: 20px 20px 16px;
+  background: var(--paper);
+  position: relative;
+  z-index: 3;
+}
+
+.hdrTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hdrWord {
+  font-family: var(--serif);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mut);
+  margin-bottom: 6px;
+}
+
+.hdrH1 {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.hdrH1 em {
+  color: var(--acc);
+  font-style: italic;
+}
+
+.hdrMeta {
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  color: var(--mut);
+  line-height: 1.8;
+  text-align: right;
+  padding-top: 4px;
+}
+
+@media (min-width: 900px) {
+  .hdr { padding: 28px 48px 22px; }
+  .hdrH1 { font-size: 44px; }
+}

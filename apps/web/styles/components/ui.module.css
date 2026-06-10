@@ -1,0 +1,49 @@
+/* Tooltip */
+.tipWrap { position: relative; display: inline-flex; align-items: center; }
+.tipIcon { width: 16px; height: 16px; border: 1px solid var(--line2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--mut); cursor: default; flex-shrink: 0; user-select: none; }
+.tipBox { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10px; line-height: 1.6; padding: 10px 13px; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.15s; min-width: 180px; max-width: 240px; white-space: normal; border: 1px solid var(--ink); }
+.tipBox::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--ink); }
+.tipWrap:hover .tipBox, .tipWrap:focus-within .tipBox { opacity: 1; }
+
+/* Feature search */
+.fsearchWrap { margin: 12px 16px 4px; position: relative; }
+.fsearchInpRow { display: flex; align-items: center; gap: 0; position: relative; }
+.fsearchIcon { position: absolute; left: 14px; font-size: 13px; color: var(--mut); pointer-events: none; z-index: 1; }
+.fsearchInp { width: 100%; background: var(--p2); border: 1.5px solid var(--line2); padding: 12px 36px 12px 38px; font-family: var(--mono); font-size: 16px; color: var(--ink); outline: none; border-radius: 0; -webkit-appearance: none; appearance: none; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; }
+.fsearchInp:focus { border-color: var(--ink); background: #fff; box-shadow: 0 0 0 3px rgba(15,14,12,0.06); }
+.fsearchInp::placeholder { color: var(--line2); font-style: italic; }
+.fsearchClear { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--mut); font-size: 16px; padding: 4px; line-height: 1; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+.fsearchClear:hover { color: var(--ink); }
+
+.fsearchDropdown { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: var(--paper); border: 1.5px solid var(--ink); border-top: none; z-index: 30; max-height: 320px; overflow-y: auto; box-shadow: 0 8px 24px rgba(15,14,12,0.12); animation: qqSlide 0.15s cubic-bezier(0.4,0,0.2,1); }
+@keyframes qqSlide { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.fsearchItem { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background 0.1s; -webkit-tap-highlight-color: transparent; }
+.fsearchItem:last-child { border-bottom: none; }
+.fsearchItem:hover { background: var(--p2); }
+.fsearchItem.sel { background: #f0ece3; }
+.fsearchCb { width: 17px; height: 17px; flex-shrink: 0; border: 1.5px solid var(--line2); background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.fsearchItem.sel .fsearchCb { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.fsearchItemBody { flex: 1; min-width: 0; }
+.fsearchItemName { font-size: 12px; color: var(--ink); line-height: 1.3; }
+.fsearchItemName mark { background: rgba(184,146,26,0.25); color: var(--ink); padding: 0 1px; }
+.fsearchItemSub { font-size: 10px; color: var(--mut); margin-top: 2px; letter-spacing: 0.03em; }
+.fsearchTierBadge { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; flex-shrink: 0; }
+.fsearchTierBadge.t1 { background: var(--ink); color: var(--paper); }
+.fsearchTierBadge.t2 { background: var(--acc); color: var(--paper); }
+.fsearchTierBadge.t3 { background: var(--gold); color: var(--ink); }
+.fsearchNoResults { padding: 18px 16px; font-size: 11px; color: var(--mut); font-style: italic; text-align: center; }
+.fsearchHint { padding: 4px 16px 8px; font-size: 9px; color: var(--mut); letter-spacing: 0.06em; border-top: 1px solid var(--line); }
+.fsearchCommRow { display: flex; align-items: center; gap: 8px; padding: 9px 16px 12px 46px; background: #f7f4ee; border-bottom: 1px solid var(--line); border-left: 3px solid var(--gold); }
+.fsearchCommLabel { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mut); flex-shrink: 0; }
+.fsearchCommPct { font-family: var(--serif); font-size: 16px; color: var(--gold); min-width: 44px; text-align: center; flex-shrink: 0; }
+.fsearchCommSl { flex: 1; -webkit-appearance: none; appearance: none; height: 2px; background: var(--line2); outline: none; cursor: pointer; }
+.fsearchCommSl::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--gold); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--gold); cursor: grab; border-radius: 0; }
+.fsearchCommSl::-moz-range-thumb { width: 14px; height: 14px; background: var(--gold); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--gold); cursor: grab; border-radius: 0; }
+.fsearchCommBtn { width: 24px; height: 24px; border: 1.5px solid var(--line2); background: var(--p2); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: var(--mut); flex-shrink: 0; user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.1s, color 0.1s; }
+.fsearchCommBtn:active { background: var(--ink); color: var(--paper); }
+
+/* Generic button */
+.qbtn { padding: 14px 8px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; border: none; cursor: pointer; transition: opacity 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
+.qbtn:active { transform: scale(0.98); opacity: 0.8; }
+.qbtnP { background: var(--acc); color: white; }
+.qbtnI { background: var(--p3); color: var(--mut); border: 1px solid var(--line2); }

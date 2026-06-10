@@ -1,0 +1,52 @@
+.ftMain { padding: 0 0 40px; }
+.ftTierBlock { margin: 0 16px 20px; border: 1px solid var(--line); overflow: hidden; }
+.ftTierHd { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 18px; background: var(--p2); border-bottom: 1px solid var(--line); }
+.ftTierCount { font-size: 9px; color: var(--mut); letter-spacing: 0.06em; }
+
+.ftFeatRow { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--line); transition: background 0.1s; }
+.ftFeatRow:last-child { border-bottom: none; }
+.ftFeatRow:hover { background: var(--p2); }
+.ftFeatBody { flex: 1; min-width: 0; }
+.ftFeatName { font-size: 12px; color: var(--ink); margin-bottom: 3px; }
+.ftFeatTip { font-size: 10px; color: var(--mut); letter-spacing: 0.03em; line-height: 1.4; }
+.ftFeatActions { display: flex; gap: 6px; flex-shrink: 0; }
+.ftBtn { padding: 6px 12px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--line2); background: var(--p2); color: var(--mut); cursor: pointer; transition: all 0.12s; -webkit-tap-highlight-color: transparent; }
+.ftBtn:hover { border-color: var(--ink); color: var(--ink); background: var(--p3); }
+.ftBtn.del:hover { border-color: var(--acc); color: var(--acc); background: rgba(200,75,47,0.06); }
+
+.ftAddBar { display: flex; align-items: center; justify-content: space-between; padding: 20px 16px 8px; gap: 12px; }
+.ftAddBtn { display: flex; align-items: center; gap: 8px; padding: 11px 20px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; border: none; cursor: pointer; transition: opacity 0.15s; -webkit-tap-highlight-color: transparent; }
+.ftAddBtn:hover { opacity: 0.85; }
+
+/* Feature modal */
+.ftModalBackdrop { position: fixed; inset: 0; background: rgba(15,14,12,0.72); z-index: 9999; display: flex; align-items: flex-start; justify-content: center; padding-top: 16px; animation: fadeIn 0.15s; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.ftModal { background: var(--paper); border: 1px solid var(--ink); width: calc(100% - 32px); max-width: 520px; animation: slideUp2 0.2s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; max-height: calc(100dvh - 48px); }
+@keyframes slideUp2 { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.ftModalHd { background: var(--ink); padding: 20px 24px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.ftModalTitle { font-family: var(--serif); font-size: 20px; font-style: italic; color: var(--paper); }
+.ftModalClose { background: none; border: none; color: #6a6560; font-size: 20px; cursor: pointer; line-height: 1; padding: 0; -webkit-tap-highlight-color: transparent; }
+.ftModalClose:hover { color: var(--paper); }
+.ftModalBody { padding: 24px; }
+.ftModalBtns { display: flex; gap: 10px; margin-top: 22px; }
+.ftTextarea { width: 100%; background: var(--p2); border: 1.5px solid var(--line2); padding: 12px 14px; font-family: var(--mono); font-size: 16px; color: var(--ink); outline: none; border-radius: 0; -webkit-appearance: none; appearance: none; resize: none; overflow: hidden; line-height: 1.6; min-height: 52px; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; display: block; }
+.ftTextarea:focus { border-color: var(--ink); background: #fff; box-shadow: 0 0 0 3px rgba(15,14,12,0.06); }
+.ftTextarea::placeholder { color: var(--line2); font-style: italic; }
+
+/* Confirm delete */
+.ftConfirm { position: fixed; inset: 0; background: rgba(15,14,12,0.72); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.15s; }
+.ftConfirmBox { background: var(--paper); border: 1px solid var(--ink); padding: 28px 24px; max-width: 420px; width: 100%; animation: slideUp2 0.2s cubic-bezier(0.4,0,0.2,1); }
+.ftConfirmTitle { font-family: var(--serif); font-size: 20px; margin-bottom: 10px; }
+.ftConfirmDesc { font-size: 11px; color: var(--mut); line-height: 1.7; margin-bottom: 22px; }
+.ftConfirmBtns { display: flex; gap: 10px; }
+
+/* Tier radio selector */
+.tierRadioGroup { display: flex; gap: 8px; flex-wrap: wrap; }
+.tierRadio { display: none; }
+.tierRadioLbl { padding: 8px 16px; border: 1.5px solid var(--line2); cursor: pointer; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mut); transition: all 0.12s; -webkit-tap-highlight-color: transparent; }
+.tierRadio:checked + .tierRadioLbl { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+
+@media (min-width: 900px) {
+  .ftMain { padding: 0 24px 40px; }
+  .ftTierBlock { margin: 0 0 20px; }
+}
