@@ -7,24 +7,24 @@ import s from "@/styles/components/pricing.module.css";
 import b from "@/styles/components/builder.module.css";
 
 const HANDOFF_FIELDS: [string, string][] = [
-  ["base",  "Base Contract Price"],
-  ["tier1", "Tier I — per Feature"],
-  ["tier2", "Tier II — per Feature"],
-  ["tier3", "Tier III — per Feature"],
+  ["base",  "Base Contract"],
+  ["tier1", "Tier I / Feature"],
+  ["tier2", "Tier II / Feature"],
+  ["tier3", "Tier III / Feature"],
 ];
 
 const HOSTED_UP_FIELDS: [string, string][] = [
-  ["base",  "Base Contract (Upfront)"],
-  ["tier1", "Tier I — Upfront per Feature"],
-  ["tier2", "Tier II — Upfront per Feature"],
-  ["tier3", "Tier III — Upfront per Feature"],
+  ["base",  "Base Contract"],
+  ["tier1", "Tier I / Feature"],
+  ["tier2", "Tier II / Feature"],
+  ["tier3", "Tier III / Feature"],
 ];
 
 const HOSTED_MO_FIELDS: [string, string][] = [
-  ["moBase", "Monthly Base Price"],
-  ["mo1",    "Tier I — Monthly per Feature"],
-  ["mo2",    "Tier II — Monthly per Feature"],
-  ["mo3",    "Tier III — Monthly per Feature"],
+  ["moBase", "Base Monthly"],
+  ["mo1",    "Tier I / Feature"],
+  ["mo2",    "Tier II / Feature"],
+  ["mo3",    "Tier III / Feature"],
 ];
 
 export function PricingView() {
@@ -37,68 +37,60 @@ export function PricingView() {
     setBasePrice(contract, key, val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      updatePricing({ [contract]: { ...pricingConfig[contract], [key]: val } });
-    }, 500);
+      // Read fresh state when timeout fires — avoids stale closure losing rapid changes
+      const latest = useStore.getState().pricingConfig;
+      updatePricing({ handoff: latest.handoff, hosted: latest.hosted, baseCommission: latest.baseCommission });
+    }, 600);
   };
+
+  const ho = pricingConfig.handoff as unknown as Record<string, number>;
+  const hs = pricingConfig.hosted as unknown as Record<string, number>;
 
   return (
     <div className={s.pMain}>
       <div className={b.sh}>
         <span className={b.shNum}>—</span>
         <span className={b.shTitle}>Base Pricing</span>
-        <span className={b.shTag}>Both contract types</span>
+        <span className={b.shTag}>Auto-saves</span>
       </div>
-      <div style={{ marginTop: 16 }}>
-        <div className={s.pCols}>
-          {/* Handoff */}
-          <div className={b.blk} style={{ margin: 0 }}>
-            <div className={s.pBlkHead}>
-              <span className={s.pBlkTitle}>Handoff</span>
-            </div>
-            <div className={b.blkIn}>
-              {HANDOFF_FIELDS.map(([k, l]) => (
-                <div className={b.fld} key={k}>
-                  <label className={b.lbl}>{l}</label>
-                  <CurrencyInput
-                    value={(pricingConfig.handoff as unknown as Record<string, number>)[k] ?? 0}
-                    onChange={(v) => handleChange("handoff", k, v)}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Hosted */}
-          <div className={b.blk} style={{ margin: 0 }}>
-            <div className={s.pBlkHead}>
-              <span className={s.pBlkTitle}>Hosted</span>
-            </div>
-            <div className={b.blkIn}>
-              <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--mut)", marginBottom: 14 }}>
-                Upfront
+      <div className={s.pGrid}>
+        {/* Handoff */}
+        <div className={s.pSection}>
+          <div className={s.pSectionHead}>Handoff</div>
+          <div className={s.pSectionBody}>
+            {HANDOFF_FIELDS.map(([k, l]) => (
+              <div className={b.fld} key={k}>
+                <label className={b.lbl}>{l}</label>
+                <CurrencyInput value={ho[k] ?? 0} onChange={(v) => handleChange("handoff", k, v)} />
               </div>
-              {HOSTED_UP_FIELDS.map(([k, l]) => (
-                <div className={b.fld} key={k}>
-                  <label className={b.lbl}>{l}</label>
-                  <CurrencyInput
-                    value={(pricingConfig.hosted as unknown as Record<string, number>)[k] ?? 0}
-                    onChange={(v) => handleChange("hosted", k, v)}
-                  />
-                </div>
-              ))}
-              <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--mut)", marginTop: 20, marginBottom: 14, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
-                Monthly
+            ))}
+          </div>
+        </div>
+
+        {/* Hosted — Upfront */}
+        <div className={s.pSection}>
+          <div className={s.pSectionHead}>Hosted · Upfront</div>
+          <div className={s.pSectionBody}>
+            {HOSTED_UP_FIELDS.map(([k, l]) => (
+              <div className={b.fld} key={k}>
+                <label className={b.lbl}>{l}</label>
+                <CurrencyInput value={hs[k] ?? 0} onChange={(v) => handleChange("hosted", k, v)} />
               </div>
-              {HOSTED_MO_FIELDS.map(([k, l]) => (
-                <div className={b.fld} key={k}>
-                  <label className={b.lbl}>{l}</label>
-                  <CurrencyInput
-                    value={(pricingConfig.hosted as unknown as Record<string, number>)[k] ?? 0}
-                    onChange={(v) => handleChange("hosted", k, v)}
-                  />
-                </div>
-              ))}
-            </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Hosted — Monthly */}
+        <div className={s.pSection}>
+          <div className={s.pSectionHead}>Hosted · Monthly</div>
+          <div className={s.pSectionBody}>
+            {HOSTED_MO_FIELDS.map(([k, l]) => (
+              <div className={b.fld} key={k}>
+                <label className={b.lbl}>{l}</label>
+                <CurrencyInput value={hs[k] ?? 0} onChange={(v) => handleChange("hosted", k, v)} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
