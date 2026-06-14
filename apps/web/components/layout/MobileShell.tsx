@@ -22,6 +22,7 @@ export function MobileShell() {
   const showShareModal = useStore((st) => st.showShareModal);
   const stripRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     if (!stripRef.current) return;
@@ -37,16 +38,21 @@ export function MobileShell() {
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
     touchStartX.current = null;
-    if (Math.abs(delta) < 60) return;
+    touchStartY.current = null;
+    // Ignore if gesture is more vertical than horizontal (user is scrolling)
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    if (Math.abs(dx) < 60) return;
     const idx = TABS.indexOf(tab);
-    if (delta < 0 && idx < TABS.length - 1) setTab(TABS[idx + 1]);
-    if (delta > 0 && idx > 0) setTab(TABS[idx - 1]);
+    if (dx < 0 && idx < TABS.length - 1) setTab(TABS[idx + 1]);
+    if (dx > 0 && idx > 0) setTab(TABS[idx - 1]);
   }, [tab, setTab]);
 
   return (
