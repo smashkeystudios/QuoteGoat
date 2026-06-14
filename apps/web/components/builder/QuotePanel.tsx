@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
 import { useComputedQuote, useAllFeats } from "@/lib/store/selectors";
 import { fmt } from "@/lib/calc";
@@ -97,7 +97,12 @@ export function QuotePanel() {
 
       if (savedId) {
         const arrayBuf = await blob.arrayBuffer();
-        const blobB64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+        const bytes = new Uint8Array(arrayBuf);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i += 8192) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+        }
+        const blobB64 = btoa(binary);
         await fetch(`/api/quotes/${savedId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -117,6 +122,20 @@ export function QuotePanel() {
       setPdfLoading(null);
     }
   };
+
+  const handleShare = useCallback(async () => {
+    if (shareQuoteId) {
+      setShowShareModal(true, shareQuoteId);
+      return;
+    }
+    const savedId = await autoSave();
+    if (savedId) {
+      setShowShareModal(true, savedId);
+    } else {
+      alert("Could not save quote before sharing. Please try again.");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shareQuoteId, setShowShareModal]);
 
   const busy = pdfLoading !== null;
 
@@ -239,9 +258,7 @@ export function QuotePanel() {
           </button>
           <button
             className={`${s.qbtn} ${s.qbtnI}`}
-            onClick={() => setShowShareModal(true, shareQuoteId ?? undefined)}
-            style={shareQuoteId ? {} : { opacity: 0.5 }}
-            title={shareQuoteId ? "Generate share link" : "Save quote first to share"}
+            onClick={handleShare}
           >
             Share Link
           </button>

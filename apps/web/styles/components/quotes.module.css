@@ -1,5 +1,5 @@
 .qvMain {
-  padding: 0 0 80px;
+  padding: 0 16px 80px;
 }
 
 .qvEmpty {
@@ -95,9 +95,6 @@
 @media (min-width: 900px) {
   .qvMain {
     max-width: 820px;
-  }
-
-  .qvCard {
-    padding: 16px 0;
+    padding: 0 24px 80px;
   }
 }

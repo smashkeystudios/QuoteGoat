@@ -10,6 +10,7 @@ const TIER_LABELS: Record<number, string> = { 1: "Tier I", 2: "Tier II", 3: "Tie
 export function SaveQuoteModal() {
   const setShowSaveQuoteModal = useStore((st) => st.setShowSaveQuoteModal);
   const setShowShareModal = useStore((st) => st.setShowShareModal);
+  const setInfo = useStore((st) => st.setInfo);
   const info = useStore((st) => st.info);
   const ct = useStore((st) => st.ct);
   const cx = useStore((st) => st.cx);
@@ -42,6 +43,9 @@ export function SaveQuoteModal() {
       });
       if (!res.ok) throw new Error("Save failed");
       const saved = await res.json();
+      const finalName = name.trim() || info.name;
+      const finalProject = project.trim() || info.project;
+      setInfo({ name: finalName, project: finalProject });
       setShowSaveQuoteModal(false);
       setShowShareModal(false, saved.id);
     } catch {

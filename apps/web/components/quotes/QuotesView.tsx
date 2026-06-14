@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { useQuotes, useDeleteQuote } from "@/lib/queries/useQuotes";
-import { fmt } from "@/lib/calc";
+import { computeQuote, fmt } from "@/lib/calc";
 import s from "@/styles/components/quotes.module.css";
 import b from "@/styles/components/builder.module.css";
 import type { SavedQuote } from "@/lib/types";
@@ -34,6 +34,14 @@ export function QuotesView() {
     const pdfUrl = process.env.NEXT_PUBLIC_PDF_SERVICE_URL;
     if (!pdfUrl) return alert("PDF service not configured.");
     try {
+      const Q = computeQuote({
+        ct: q.ct,
+        sel: new Set(q.sel),
+        cx: q.cx,
+        trf: q.trf,
+        config: q.pricingSnapshot,
+        tiers: [],
+      });
       const res = await fetch(`${pdfUrl}/pdf/${type}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -45,15 +53,18 @@ export function QuotesView() {
           quoteId: q.id,
           validityDays: 30,
           computed: {
-            bc: q.computed.bc, bcRaw: q.computed.bc, bcCommPct: 0,
-            upMod: 0, upBase: 0, mo: q.computed.mo,
-            moBase: 0, moFeats: q.computed.mo,
-            total: q.computed.total, totalNoMod: q.computed.total, delta: q.computed.delta,
+            bc: Q.bc, bcRaw: Q.bcRaw, bcCommPct: Q.bcCommPct,
+            upMod: Q.upMod, upBase: Q.upBase, mo: Q.mo,
+            moBase: Q.moBase, moFeats: Q.moFeats,
+            total: Q.total, totalNoMod: Q.totalNoMod, delta: Q.delta,
           },
           featureRows: q.features.map((f) => ({
             id: f.id, name: f.name, tip: f.tip,
             tier: f.tier, tierLabel: f.tierLabel,
-            basePrice: 0, commission: 0, finalPrice: 0, monthlyPrice: 0,
+            basePrice: Q.baseUpCx(f.id),
+            commission: Q.modPct(f.id) * 100,
+            finalPrice: Q.finalUp(f.id),
+            monthlyPrice: q.ct === "hosted" ? Q.moFeat(f.id) : undefined,
           })),
         }),
       });
