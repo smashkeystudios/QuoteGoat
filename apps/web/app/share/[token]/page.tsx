@@ -73,10 +73,16 @@ export default async function SharePage({ params }: { params: { token: string } 
 
 function buildHtml(quote: SavedQuote, expiresAt: string): string {
   const { info, ct, cx, trf, sel, features, pricingSnapshot, computed } = quote;
+  const syntheticTiers = [1, 2, 3].map((id) => ({
+    id, label: `Tier ${id}`, cls: `t${id}` as "t1" | "t2" | "t3", tooltip: "",
+    features: features
+      .filter((f) => f.tier === id)
+      .map((f) => ({ id: f.id, name: f.name, tip: f.tip ?? "", tierId: id, sortOrder: 0 })),
+  }));
   const Q = computeQuote({
     ct, sel: new Set(sel), cx, trf,
     config: pricingSnapshot,
-    tiers: [],
+    tiers: syntheticTiers,
   });
 
   const ctLabel = ct === "handoff" ? "Handoff" : "Hosted Retainer";

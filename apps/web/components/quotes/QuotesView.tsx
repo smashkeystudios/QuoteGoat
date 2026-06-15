@@ -34,13 +34,19 @@ export function QuotesView() {
     const pdfUrl = process.env.NEXT_PUBLIC_PDF_SERVICE_URL;
     if (!pdfUrl) return alert("PDF service not configured.");
     try {
+      const syntheticTiers = [1, 2, 3].map((id) => ({
+        id, label: `Tier ${id}`, cls: `t${id}` as "t1" | "t2" | "t3", tooltip: "",
+        features: q.features
+          .filter((f) => f.tier === id)
+          .map((f) => ({ id: f.id, name: f.name, tip: f.tip ?? "", tierId: id, sortOrder: 0 })),
+      }));
       const Q = computeQuote({
         ct: q.ct,
         sel: new Set(q.sel),
         cx: q.cx,
         trf: q.trf,
         config: q.pricingSnapshot,
-        tiers: [],
+        tiers: syntheticTiers,
       });
       const res = await fetch(`${pdfUrl}/pdf/${type}`, {
         method: "POST",
