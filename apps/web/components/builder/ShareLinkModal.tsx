@@ -26,6 +26,12 @@ export function ShareLinkModal() {
       if (!res.ok) throw new Error("Share failed");
       const data = await res.json();
       setResult({ url: data.url, expiresAt: data.expiresAt });
+      // Auto-copy immediately so it's truly one-click
+      try {
+        await navigator.clipboard.writeText(data.url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch { /* clipboard may be blocked, user can still click Copy */ }
     } catch {
       alert("Could not generate share link. Please try again.");
     } finally {
@@ -100,17 +106,21 @@ export function ShareLinkModal() {
           <>
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--mut)", marginBottom: 6 }}>
-                Shareable Link
+                Shareable Link {copied && <span style={{ color: "var(--grn)", marginLeft: 6 }}>— Copied to clipboard!</span>}
               </div>
-              <div style={{
-                background: "var(--p2)", border: "1px solid var(--line)", padding: "10px 12px",
-                fontFamily: "var(--mono)", fontSize: 11, wordBreak: "break-all", lineHeight: 1.6,
-                color: "var(--acc)"
-              }}>
+              <div
+                onClick={handleCopy}
+                title="Click to copy"
+                style={{
+                  background: "var(--p2)", border: "1px solid var(--line)", padding: "10px 12px",
+                  fontFamily: "var(--mono)", fontSize: 11, wordBreak: "break-all", lineHeight: 1.6,
+                  color: "var(--acc)", cursor: "pointer",
+                }}
+              >
                 {result.url}
               </div>
               <div style={{ fontSize: 10, color: "var(--mut)", marginTop: 6 }}>
-                Expires {expiryLabel}
+                Expires {expiryLabel} · Click link above or button below to copy
               </div>
             </div>
             <div className={s.qqModalBtns}>

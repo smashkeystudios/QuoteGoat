@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
 import { useStore } from "../store";
@@ -8,6 +9,17 @@ const STALE = 10 * 60 * 1000;
 
 export function usePricing() {
   const setPricingConfig = useStore((s) => s.setPricingConfig);
+
+  // Wait for zustand persist to finish reading from localStorage before
+  // deciding whether to seed from KV. Without this, the KV response can
+  // arrive and overwrite LS data before LS has even been read.
+  const [storeReady, setStoreReady] = useState(() => useStore.persist.hasHydrated());
+  useEffect(() => {
+    if (!storeReady) {
+      return useStore.persist.onFinishHydration(() => setStoreReady(true));
+    }
+  }, [storeReady]);
+
   return useQuery<PricingConfig>({
     queryKey: ["pricing"],
     queryFn: async () => {
@@ -16,8 +28,14 @@ export function usePricing() {
       return res.json();
     },
     staleTime: STALE,
+    // Don't run until we know whether LS had data
+    enabled: storeReady,
     select: (data) => {
-      setPricingConfig(data);
+      // If LS already had pricing config, trust it — don't overwrite with KV.
+      // pricingHydrated is set to true during the persist merge when LS had data.
+      if (!useStore.getState().pricingHydrated) {
+        setPricingConfig(data);
+      }
       return data;
     },
   });
