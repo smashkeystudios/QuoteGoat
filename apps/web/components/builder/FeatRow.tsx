@@ -18,8 +18,8 @@ interface Props {
 export const FeatRow = memo(function FeatRow({ feat, isSel, mod, price, basePrice, onToggle, onMod }: Props) {
   const hasModEffect = price !== basePrice;
   return (
-    <>
-      <div className={`${s.feat} ${isSel ? s.on : ""}`} onClick={onToggle}>
+    <div className={`${s.featCard} ${isSel ? s.on : ""}`}>
+      <div className={s.feat} onClick={onToggle}>
         <div className={s.featCb}>{isSel ? "✓" : ""}</div>
         <div className={s.featBody}>
           <div className={s.featName}>{feat.name}</div>
@@ -56,6 +56,6 @@ export const FeatRow = memo(function FeatRow({ feat, isSel, mod, price, basePric
           />
         </div>
       )}
-    </>
+    </div>
   );
 });
