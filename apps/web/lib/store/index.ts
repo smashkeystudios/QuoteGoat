@@ -18,7 +18,7 @@ export const useStore = create<StoreState>()(
       ...createUiSlice(...a),
     }),
     {
-      name: "quote-goat-store",
+      name: "quote-goat-v2",
       storage: createJSONStorage(() => localStorage),
       // Only persist the fields that should survive a page refresh
       partialize: (state) => ({

@@ -30,8 +30,8 @@ export function SaveQuoteModal() {
   const handleSave = async () => {
     const clientName = info.name.trim();
     const projectName = info.project.trim();
-    if (!clientName && !projectName) {
-      setError("Enter at least a Client Name or Project Name.");
+    if (!clientName || !projectName) {
+      setError("Both Client Name and Project Name are required.");
       return;
     }
     setSaving(true);

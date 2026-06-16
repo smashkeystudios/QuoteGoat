@@ -1,19 +1,19 @@
 .strip { position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--ink); border-top: 2px solid #2a2520; }
 .stripBar { display: flex; align-items: stretch; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .stripBar::-webkit-scrollbar { display: none; }
-.sc { flex-shrink: 0; padding: 12px 20px; border-right: 1px solid rgba(255,255,255,0.07); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+.sc { flex-shrink: 0; padding: 13px 22px; border-right: 1px solid rgba(255,255,255,0.07); min-width: 130px; display: flex; flex-direction: column; justify-content: center; }
 .sc:last-child { border-right: none; }
-.scLbl { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #5a5550; margin-bottom: 5px; }
-.scVal { font-family: var(--serif); font-size: 28px; color: var(--paper); line-height: 1; }
+.scLbl { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #6a6560; margin-bottom: 6px; }
+.scVal { font-family: var(--serif); font-size: 36px; color: var(--paper); line-height: 1; }
 .scVal.acc { color: #e06644; }
 .scVal.grn { color: #4fa874; }
 .scVal.gld { color: #c9a84c; }
-.scChips { display: flex; flex-wrap: nowrap; gap: 5px; margin-top: 5px; overflow: hidden; }
-.scChip { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; background: rgba(255,255,255,0.06); color: #8a8278; white-space: nowrap; }
-.stripEmpty { font-size: 12px; color: #3a3530; font-style: italic; }
-.stripToggleBtn { flex-shrink: 0; display: flex; align-items: center; gap: 6px; margin-left: auto; padding: 0 18px; background: none; border: none; border-left: 1px solid rgba(255,255,255,0.07); cursor: pointer; color: #6a6560; font-family: var(--mono); font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; white-space: nowrap; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+.scChips { display: flex; flex-wrap: nowrap; gap: 5px; margin-top: 6px; overflow: hidden; }
+.scChip { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; background: rgba(255,255,255,0.06); color: #8a8278; white-space: nowrap; }
+.stripEmpty { font-size: 13px; color: #3a3530; font-style: italic; }
+.stripToggleBtn { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-left: auto; padding: 0 22px; background: none; border: none; border-left: 1px solid rgba(255,255,255,0.07); cursor: pointer; color: #6a6560; font-family: var(--mono); font-size: 13px; letter-spacing: 0.09em; text-transform: uppercase; white-space: nowrap; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
 .stripToggleBtn:hover { color: var(--paper); }
-.stripToggleArrow { font-size: 13px; transition: transform 0.3s; display: inline-block; }
+.stripToggleArrow { font-size: 15px; transition: transform 0.3s; display: inline-block; }
 .stripToggleArrow.up { transform: rotate(180deg); }
 
 /* expanded */

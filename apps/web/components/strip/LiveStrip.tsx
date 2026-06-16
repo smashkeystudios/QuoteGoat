@@ -27,10 +27,10 @@ export function LiveStrip() {
     <div className={s.strip}>
       {/* Collapsed bar */}
       <div className={s.stripBar}>
-        <div className={s.sc} style={{ minWidth: 90 }}>
+        <div className={s.sc} style={{ minWidth: 100 }}>
           <div className={s.scLbl}>Type</div>
-          <div className={s.scVal} style={{ fontSize: 16, letterSpacing: "0.08em", textTransform: "uppercase" }}>{ct}</div>
-          <div style={{ fontSize: 10, color: "#4a4540", marginTop: 3 }}>{count} feat.</div>
+          <div className={s.scVal} style={{ fontSize: 22, letterSpacing: "0.08em", textTransform: "uppercase" }}>{ct}</div>
+          <div style={{ fontSize: 12, color: "#5a5550", marginTop: 4 }}>{count} feat.</div>
         </div>
         <div className={s.sc}>
           <div className={s.scLbl}>Base</div>
