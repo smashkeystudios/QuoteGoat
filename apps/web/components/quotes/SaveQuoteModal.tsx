@@ -10,6 +10,7 @@ const TIER_LABELS: Record<number, string> = { 1: "Tier I", 2: "Tier II", 3: "Tie
 export function SaveQuoteModal() {
   const setShowSaveQuoteModal = useStore((st) => st.setShowSaveQuoteModal);
   const setShowShareModal = useStore((st) => st.setShowShareModal);
+  const pendingShare = useStore((st) => st.pendingShare);
   const setInfo = useStore((st) => st.setInfo);
   const info = useStore((st) => st.info);
   const ct = useStore((st) => st.ct);
@@ -47,7 +48,12 @@ export function SaveQuoteModal() {
       const finalProject = project.trim() || info.project;
       setInfo({ name: finalName, project: finalProject });
       setShowSaveQuoteModal(false);
-      setShowShareModal(false, saved.id);
+      // If opened from "Share Link" button, chain straight into the share modal
+      if (pendingShare) {
+        setShowShareModal(true, saved.id);
+      } else {
+        setShowShareModal(false, saved.id);
+      }
     } catch {
       alert("Could not save quote. Please try again.");
     } finally {

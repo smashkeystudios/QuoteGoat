@@ -122,7 +122,7 @@
 @media (min-width: 900px) {
   .builderDesktop { display: grid !important; grid-template-columns: 1fr 360px; gap: 0; align-items: start; }
   .builderLeft { border-right: 1px solid var(--line); }
-  .builderRight { position: sticky; top: 49px; max-height: calc(100dvh - 49px); overflow-y: auto; }
+  .builderRight { position: sticky; top: 49px; align-self: start; }
   .sh { padding: 28px 24px 12px; }
   .blk { margin: 20px 24px; }
   .blkIn { padding: 22px; }

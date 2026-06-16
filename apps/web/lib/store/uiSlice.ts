@@ -9,6 +9,7 @@ export interface UiSlice {
   showQQ: boolean;
   showSaveModal: boolean;
   showSaveQuoteModal: boolean;
+  pendingShare: boolean;        // true when Save modal was opened from Share button
   showShareModal: boolean;
   shareQuoteId: string | null;
 
@@ -16,7 +17,7 @@ export interface UiSlice {
   toggleStrip: () => void;
   setShowQQ: (v: boolean) => void;
   setShowSaveModal: (v: boolean) => void;
-  setShowSaveQuoteModal: (v: boolean) => void;
+  setShowSaveQuoteModal: (v: boolean, pendingShare?: boolean) => void;
   setShowShareModal: (v: boolean, quoteId?: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const createUiSlice: StateCreator<StoreState, [], [], UiSlice> = (set) =>
   showQQ: false,
   showSaveModal: false,
   showSaveQuoteModal: false,
+  pendingShare: false,
   showShareModal: false,
   shareQuoteId: null,
 
@@ -33,7 +35,8 @@ export const createUiSlice: StateCreator<StoreState, [], [], UiSlice> = (set) =>
   toggleStrip: () => set((s) => ({ stripExpanded: !s.stripExpanded })),
   setShowQQ: (showQQ) => set({ showQQ }),
   setShowSaveModal: (showSaveModal) => set({ showSaveModal }),
-  setShowSaveQuoteModal: (showSaveQuoteModal) => set({ showSaveQuoteModal }),
+  setShowSaveQuoteModal: (showSaveQuoteModal, pendingShare = false) =>
+    set({ showSaveQuoteModal, pendingShare }),
   setShowShareModal: (showShareModal, quoteId) =>
     set({ showShareModal, shareQuoteId: quoteId ?? null }),
 });

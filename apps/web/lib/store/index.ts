@@ -22,6 +22,7 @@ export const useStore = create<StoreState>()(
       storage: createJSONStorage(() => localStorage),
       // Only persist the fields that should survive a page refresh
       partialize: (state) => ({
+        tab: state.tab,
         ct: state.ct,
         cx: state.cx,
         trf: state.trf,

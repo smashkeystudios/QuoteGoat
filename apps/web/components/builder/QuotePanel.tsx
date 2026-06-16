@@ -15,7 +15,7 @@ export function QuotePanel() {
   const info = useStore((st) => st.info);
   const pricingConfig = useStore((st) => st.pricingConfig);
   const setShowSaveQuoteModal = useStore((st) => st.setShowSaveQuoteModal);
-  const setShowShareModal = useStore((st) => st.setShowShareModal);
+  const setShowShareModal    = useStore((st) => st.setShowShareModal);
   const shareQuoteId = useStore((st) => st.shareQuoteId);
   const Q = useComputedQuote();
   const allFeats = useAllFeats();
@@ -123,19 +123,14 @@ export function QuotePanel() {
     }
   };
 
-  const handleShare = useCallback(async () => {
+  const handleShare = useCallback(() => {
     if (shareQuoteId) {
       setShowShareModal(true, shareQuoteId);
       return;
     }
-    const savedId = await autoSave();
-    if (savedId) {
-      setShowShareModal(true, savedId);
-    } else {
-      alert("Could not save quote before sharing. Please try again.");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shareQuoteId, setShowShareModal]);
+    // No saved quote yet — open Save modal first; it will chain into Share modal
+    setShowSaveQuoteModal(true, true);
+  }, [shareQuoteId, setShowShareModal, setShowSaveQuoteModal]);
 
   const busy = pdfLoading !== null;
 
