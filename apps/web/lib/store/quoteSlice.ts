@@ -70,5 +70,6 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
       cx: q.cx,
       trf: q.trf,
       info: q.info,
+      notes: q.notes ?? [],
     }),
 });

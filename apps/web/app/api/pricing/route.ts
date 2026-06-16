@@ -27,6 +27,8 @@ export async function PUT(req: Request) {
     ...(body.hosted && { hosted: { ...config.hosted, ...body.hosted } }),
     ...(body.mods && { mods: body.mods }),
     ...(body.baseCommission !== undefined && { baseCommission: body.baseCommission }),
+    ...(body.cxRate !== undefined && { cxRate: body.cxRate }),
+    ...(body.trfRate !== undefined && { trfRate: body.trfRate }),
   };
   await setKV(KEY, updated);
   return NextResponse.json(updated);

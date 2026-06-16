@@ -50,6 +50,8 @@ export const DEF_PRICING: PricingConfig = {
   hosted:  { base: 1800, tier1: 900,  tier2: 2200, tier3: 4200, moBase: 500, mo1: 120, mo2: 250, mo3: 450 },
   mods: Object.fromEntries(ALL_FEAT_IDS.map((id) => [id, 30])),
   baseCommission: 0,
+  cxRate: 15,
+  trfRate: 20,
 };
 
 export const PRESET_TEMPLATES: Template[] = [

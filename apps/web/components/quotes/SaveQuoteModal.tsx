@@ -19,6 +19,7 @@ export function SaveQuoteModal() {
   const ct = useStore((st) => st.ct);
   const cx = useStore((st) => st.cx);
   const trf = useStore((st) => st.trf);
+  const notes = useStore((st) => st.notes);
   const pricingConfig = useStore((st) => st.pricingConfig);
   const Q = useComputedQuote();
   const allFeats = useAllFeats();
@@ -41,6 +42,7 @@ export function SaveQuoteModal() {
         body: JSON.stringify({
           info,
           ct, cx, trf,
+          notes,
           sel: Q.arr,
           features: Q.arr.map((fid) => {
             const f = allFeats.find((x) => x.id === fid);

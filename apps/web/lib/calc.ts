@@ -4,8 +4,8 @@ export const fmt = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
 export const r5 = (n: number) => Math.ceil(n / 5) * 5;
-export const cxM = (v: number) => 1 + (v - 1) * 0.15;
-export const trfM = (v: number) => 1 + (v - 1) * 0.12;
+export const cxM = (v: number, rate = 0.15) => 1 + (v - 1) * rate;
+export const trfM = (v: number, rate = 0.20) => 1 + (v - 1) * rate;
 export const clamp = (v: number, mn: number, mx: number) => Math.min(mx, Math.max(mn, v));
 
 export const MOD_MIN = 5;
@@ -31,8 +31,8 @@ export function computeQuote(params: {
 }): ComputedQuote {
   const { ct, sel, cx, trf, config, tiers } = params;
   const featMap = buildFeatMap(tiers);
-  const cmx = cxM(cx);
-  const tmx = trfM(trf);
+  const cmx = cxM(cx, (config.cxRate ?? 15) / 100);
+  const tmx = trfM(trf, (config.trfRate ?? 20) / 100);
 
   const baseUp = (fid: string): number =>
     (config[ct] as unknown as Record<string, number>)[`tier${featMap[fid]}`] ?? 0;

@@ -36,6 +36,8 @@ export interface PricingConfig {
   hosted: PricingHosted;
   mods: Record<string, number>;
   baseCommission: number;
+  cxRate?: number;  // percent per complexity step, default 15
+  trfRate?: number; // percent per traffic step, default 20
 }
 
 export interface Template {
@@ -129,6 +131,7 @@ export interface SavedQuote {
   trf: number;
   sel: string[];
   features: SavedQuoteFeature[];
+  notes?: string[];
   pricingSnapshot: PricingConfig;
   computed: {
     total: number;

@@ -24,6 +24,7 @@ export async function POST(req: Request) {
     trf: body.trf,
     sel: body.sel,
     features: body.features ?? [],
+    notes: body.notes ?? [],
     pricingSnapshot: body.pricingSnapshot,
     computed: body.computed,
   };
