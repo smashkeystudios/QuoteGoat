@@ -11,11 +11,17 @@ export function LiveStrip() {
   const sel = useStore((st) => st.sel);
   const cx = useStore((st) => st.cx);
   const trf = useStore((st) => st.trf);
+  const pricingConfig = useStore((st) => st.pricingConfig);
   const Q = useComputedQuote();
   const allFeats = useAllFeats();
   const featMap = useFeatMap();
   const count = sel.size;
   const selArr = Q.arr;
+
+  const cxRate = (pricingConfig.cxRate ?? 15) / 100;
+  const trfRate = (pricingConfig.trfRate ?? 20) / 100;
+  const hasCommission = Q.delta > 0;
+  const hasMonthly = ct === "hosted" && Q.mo > 0;
 
   return (
     <div className={s.strip}>
@@ -23,27 +29,48 @@ export function LiveStrip() {
       <div className={s.stripBar}>
         <div className={s.sc} style={{ minWidth: 90 }}>
           <div className={s.scLbl}>Type</div>
-          <div className={`${s.scVal}`} style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>{ct}</div>
-          <div style={{ fontSize: 8, color: "#4a4540", marginTop: 2 }}>{count} feat.</div>
+          <div className={s.scVal} style={{ fontSize: 16, letterSpacing: "0.08em", textTransform: "uppercase" }}>{ct}</div>
+          <div style={{ fontSize: 10, color: "#4a4540", marginTop: 3 }}>{count} feat.</div>
         </div>
         <div className={s.sc}>
           <div className={s.scLbl}>Base</div>
-          <div className={s.scVal} style={{ fontSize: 16 }}>{fmt(Q.bc)}</div>
+          <div className={s.scVal}>{fmt(Q.bc)}</div>
         </div>
         <div className={s.sc}>
           <div className={s.scLbl}>Features</div>
-          <div className={`${s.scVal} ${s.gld}`} style={{ fontSize: 16 }}>{fmt(Q.upMod)}</div>
+          <div className={`${s.scVal} ${s.gld}`}>{fmt(Q.upMod)}</div>
         </div>
+        {hasCommission && (
+          <div className={s.sc}>
+            <div className={s.scLbl}>Commission</div>
+            <div className={`${s.scVal} ${s.gld}`}>{fmt(Q.delta)}</div>
+            <div style={{ fontSize: 10, color: "#5a5030", marginTop: 3 }}>
+              {(Q.bcCommPct * 100).toFixed(0)}% base + feat. mods
+            </div>
+          </div>
+        )}
         <div className={s.sc}>
           <div className={s.scLbl}>Total Upfront</div>
           <div className={`${s.scVal} ${s.acc}`}>{fmt(Q.total)}</div>
         </div>
-        {ct === "hosted" && (
+        {hasMonthly && (
           <div className={s.sc}>
             <div className={s.scLbl}>Monthly</div>
-            <div className={`${s.scVal} ${s.grn}`} style={{ fontSize: 16 }}>
-              {fmt(Q.mo)}<span style={{ fontSize: 10, color: "#4a4640" }}>/mo</span>
+            <div className={`${s.scVal} ${s.grn}`}>
+              {fmt(Q.mo)}<span style={{ fontSize: 12, color: "#4a4640" }}>/mo</span>
             </div>
+          </div>
+        )}
+        {hasMonthly && (
+          <div className={s.sc}>
+            <div className={s.scLbl}>LCV 1yr</div>
+            <div className={`${s.scVal} ${s.grn}`}>{fmt(Q.total + Q.mo * 12)}</div>
+          </div>
+        )}
+        {hasMonthly && (
+          <div className={s.sc}>
+            <div className={s.scLbl}>LCV 2yr</div>
+            <div className={`${s.scVal} ${s.grn}`}>{fmt(Q.total + Q.mo * 24)}</div>
           </div>
         )}
         <div className={s.sc} style={{ minWidth: 130, flex: 1 }}>
@@ -71,18 +98,18 @@ export function LiveStrip() {
           <div className={s.expGrid}>
             <div className={s.expCell}>
               <div className={s.expLbl}>Contract Type</div>
-              <div className={`${s.expVal}`} style={{ fontSize: 16, letterSpacing: "0.06em", textTransform: "uppercase" }}>{ct}</div>
+              <div className={s.expVal} style={{ fontSize: 16, letterSpacing: "0.06em", textTransform: "uppercase" }}>{ct}</div>
             </div>
             <div className={s.expCell}>
               <div className={s.expLbl}>Complexity</div>
               <div className={s.expVal}>{cx}<span style={{ fontSize: 14, color: "#6a6560" }}>/5</span></div>
-              <div className={s.expSub}>×{cxM(cx).toFixed(2)} upfront</div>
+              <div className={s.expSub}>×{cxM(cx, cxRate).toFixed(2)} upfront</div>
             </div>
             {ct === "hosted" && (
               <div className={s.expCell}>
                 <div className={s.expLbl}>Traffic Load</div>
                 <div className={s.expVal}>{trf}<span style={{ fontSize: 14, color: "#6a6560" }}>/5</span></div>
-                <div className={s.expSub}>×{trfM(trf).toFixed(2)} monthly</div>
+                <div className={s.expSub}>×{trfM(trf, trfRate).toFixed(2)} monthly</div>
               </div>
             )}
             <div className={s.expCell}>
@@ -92,24 +119,50 @@ export function LiveStrip() {
             <hr className={s.expDivider} />
             <div className={s.expCell}>
               <div className={s.expLbl}>Base Contract</div>
-              <div className={s.expVal} style={{ fontSize: 18 }}>{fmt(Q.bc)}</div>
+              <div className={s.expVal} style={{ fontSize: 22 }}>{fmt(Q.bc)}</div>
               {Q.bcCommPct > 0 && <div className={s.expSub}>incl. +{Math.round(Q.bcCommPct * 100)}% commission</div>}
+              {Q.bcCommPct > 0 && <div className={s.expSub} style={{ color: "#c9a84c" }}>raw: {fmt(Q.bcRaw)}</div>}
             </div>
             <div className={s.expCell}>
               <div className={s.expLbl}>Features Upfront</div>
-              <div className={`${s.expVal} ${s.gld}`} style={{ fontSize: 18 }}>{fmt(Q.upMod)}</div>
+              <div className={`${s.expVal} ${s.gld}`} style={{ fontSize: 22 }}>{fmt(Q.upMod)}</div>
               {Q.delta !== 0 && <div className={s.expSub}>+{fmt(Q.delta)} commission</div>}
+              {Q.upBase !== Q.upMod && <div className={s.expSub} style={{ color: "#c9a84c" }}>base: {fmt(Q.upBase)}</div>}
             </div>
+            {hasCommission && (
+              <div className={s.expCell}>
+                <div className={s.expLbl}>Total Commission</div>
+                <div className={`${s.expVal} ${s.gld}`} style={{ fontSize: 22 }}>{fmt(Q.delta)}</div>
+                <div className={s.expSub}>{((Q.delta / Q.total) * 100).toFixed(1)}% effective margin</div>
+              </div>
+            )}
             <div className={s.expCell}>
               <div className={s.expLbl}>Total Upfront</div>
               <div className={`${s.expVal} ${s.acc}`}>{fmt(Q.total)}</div>
             </div>
-            {ct === "hosted" && (
-              <div className={s.expCell}>
-                <div className={s.expLbl}>Monthly Retainer</div>
-                <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 18 }}>{fmt(Q.mo)}<span style={{ fontSize: 12, color: "#4a4540" }}>/mo</span></div>
-                <div className={s.expSub}>{fmt(Q.mo * 12)}/yr</div>
-              </div>
+            {hasMonthly && (
+              <>
+                <div className={s.expCell}>
+                  <div className={s.expLbl}>Monthly Retainer</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.mo)}<span style={{ fontSize: 12, color: "#4a4540" }}>/mo</span></div>
+                  <div className={s.expSub}>{fmt(Q.mo * 12)}/yr</div>
+                </div>
+                <div className={s.expCell}>
+                  <div className={s.expLbl}>LCV 1 Year</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.mo * 12)}</div>
+                  <div className={s.expSub}>upfront + 12 mo</div>
+                </div>
+                <div className={s.expCell}>
+                  <div className={s.expLbl}>LCV 2 Years</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.mo * 24)}</div>
+                  <div className={s.expSub}>upfront + 24 mo</div>
+                </div>
+                <div className={s.expCell}>
+                  <div className={s.expLbl}>LCV 3 Years</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.mo * 36)}</div>
+                  <div className={s.expSub}>upfront + 36 mo</div>
+                </div>
+              </>
             )}
           </div>
 
