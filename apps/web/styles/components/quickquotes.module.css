@@ -1,4 +1,4 @@
-.qqBar { background: var(--p2); border-bottom: 1px solid var(--line); padding: 0 16px; display: flex; align-items: center; gap: 0; position: relative; z-index: 2; }
+.qqBar { background: var(--p2); border-bottom: 1px solid var(--line); padding: 0 16px; display: flex; align-items: center; gap: 0; position: relative; z-index: 10; }
 .qqTrigger { display: flex; align-items: center; gap: 8px; padding: 11px 0; cursor: pointer; background: none; border: none; font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mut); transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
 .qqTrigger:hover { color: var(--ink); }
 .qqTrigger.open { color: var(--ink); }
