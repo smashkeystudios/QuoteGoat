@@ -4,6 +4,7 @@ import { ClientDetailsSection } from "./ClientDetailsSection";
 import { ContractSection } from "./ContractSection";
 import { FeatureSearch } from "./FeatureSearch";
 import { TierList } from "./TierList";
+import { NotesSection } from "./NotesSection";
 import { QuotePanel } from "./QuotePanel";
 import s from "@/styles/components/builder.module.css";
 
@@ -26,8 +27,9 @@ export function BuilderView({ mobile = false }: Props) {
         </div>
         <FeatureSearch />
         <TierList />
+        <NotesSection />
         <div className={s.sh} style={{ marginTop: 8 }}>
-          <span className={s.shNum}>04</span>
+          <span className={s.shNum}>05</span>
           <span className={s.shTitle}>Quote</span>
           <span className={s.shTag}>Live</span>
         </div>
@@ -49,13 +51,14 @@ export function BuilderView({ mobile = false }: Props) {
         </div>
         <FeatureSearch />
         <TierList />
+        <NotesSection />
       </div>
 
       {/* Right sticky column */}
       <div className={s.builderRight}>
-        <div style={{ padding: "28px 0 0" }}>
+        <div style={{ padding: "4px 0 0" }}>
           <div className={s.sh} style={{ paddingTop: 0 }}>
-            <span className={s.shNum}>04</span>
+            <span className={s.shNum}>05</span>
             <span className={s.shTitle}>Quote</span>
             <span className={s.shTag}>Live</span>
           </div>

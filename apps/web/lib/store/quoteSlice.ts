@@ -8,6 +8,7 @@ export interface QuoteSlice {
   cx: number;
   trf: number;
   info: QuoteInfo;
+  notes: string[];
 
   setCt: (ct: ContractType) => void;
   toggleFeature: (id: string) => void;
@@ -15,6 +16,9 @@ export interface QuoteSlice {
   setCx: (v: number) => void;
   setTrf: (v: number) => void;
   setInfo: (patch: Partial<QuoteInfo>) => void;
+  addNote: () => void;
+  updateNote: (idx: number, text: string) => void;
+  deleteNote: (idx: number) => void;
   resetQuote: () => void;
   loadTemplate: (tpl: Template, pricingPatch?: Partial<PricingConfig>) => void;
   loadSavedQuote: (q: SavedQuote) => void;
@@ -32,6 +36,7 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   cx: 1,
   trf: 1,
   info: defaultInfo,
+  notes: [],
 
   setCt: (ct) => set({ ct }),
   toggleFeature: (id) =>
@@ -44,8 +49,13 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   setCx: (cx) => set({ cx }),
   setTrf: (trf) => set({ trf }),
   setInfo: (patch) => set((s) => ({ info: { ...s.info, ...patch } })),
+  addNote: () => set((s) => ({ notes: [...s.notes, ""] })),
+  updateNote: (idx, text) =>
+    set((s) => { const n = [...s.notes]; n[idx] = text; return { notes: n }; }),
+  deleteNote: (idx) =>
+    set((s) => ({ notes: s.notes.filter((_, i) => i !== idx) })),
   resetQuote: () =>
-    set({ ct: "handoff", sel: new Set(), cx: 1, trf: 1, info: defaultInfo }),
+    set({ ct: "handoff", sel: new Set(), cx: 1, trf: 1, info: defaultInfo, notes: [] }),
   loadTemplate: (tpl) =>
     set({
       ct: tpl.ct,

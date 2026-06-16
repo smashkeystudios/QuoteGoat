@@ -27,6 +27,7 @@ export const useStore = create<StoreState>()(
         cx: state.cx,
         trf: state.trf,
         info: state.info,
+        notes: state.notes,
         sel: Array.from(state.sel),   // Set → Array for JSON
         pricingConfig: state.pricingConfig,
       }),

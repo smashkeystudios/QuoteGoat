@@ -54,7 +54,7 @@
 .pip.on { background: var(--acc); }
 
 /* Tier / feature rows */
-.tier { margin: 16px; border: 1px solid var(--line); overflow: hidden; }
+.tier { margin: 16px; border: 1.5px solid var(--line2); overflow: hidden; }
 .tierHd { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 11px 16px; background: var(--p2); border-bottom: 1px solid var(--line); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.15s; }
 .tierHd:hover { background: var(--p3); }
 .tierChevron { margin-left: auto; font-size: 11px; color: var(--mut); flex-shrink: 0; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); display: inline-block; }
@@ -67,11 +67,11 @@
 .tierPill.t3 { background: var(--gold); color: var(--ink); }
 .tierNote { font-size: 12px; color: var(--mut); letter-spacing: 0.02em; }
 
-.feat { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background 0.1s; position: relative; -webkit-tap-highlight-color: transparent; }
+.feat { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-bottom: 2px solid var(--line2); cursor: pointer; transition: background 0.1s; position: relative; -webkit-tap-highlight-color: transparent; }
 .feat:last-child { border-bottom: none; }
 .feat:hover, .feat:active { background: var(--p2); }
 .feat.on { background: #f0ece3; }
-.feat.on::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--acc); }
+.feat.on::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--acc); }
 .featCb { width: 18px; height: 18px; flex-shrink: 0; border: 1.5px solid var(--line2); background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 1px; transition: all 0.12s; }
 .feat.on .featCb { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .featBody { flex: 1; min-width: 0; }
