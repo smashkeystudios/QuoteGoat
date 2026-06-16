@@ -49,7 +49,7 @@ export const DEF_PRICING: PricingConfig = {
   handoff: { base: 2500, tier1: 800,  tier2: 1800, tier3: 3500 },
   hosted:  { base: 1800, tier1: 900,  tier2: 2200, tier3: 4200, moBase: 500, mo1: 120, mo2: 250, mo3: 450 },
   mods: Object.fromEntries(ALL_FEAT_IDS.map((id) => [id, 30])),
-  baseCommission: 0,
+  baseCommission: 20,
   cxRate: 15,
   trfRate: 20,
 };

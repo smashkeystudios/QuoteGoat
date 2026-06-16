@@ -79,38 +79,16 @@ export function QuotePanel() {
   };
 
   const downloadPdf = async (endpoint: "client" | "internal") => {
-    const pdfUrl = process.env.NEXT_PUBLIC_PDF_SERVICE_URL;
-    if (!pdfUrl) {
-      alert("PDF service not configured. Set NEXT_PUBLIC_PDF_SERVICE_URL.");
-      return;
-    }
     setPdfLoading(endpoint);
     try {
       const savedId = shareQuoteId ?? (await autoSave());
-
-      const res = await fetch(`${pdfUrl}/pdf/${endpoint}`, {
+      const res = await fetch(`/api/pdf/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildPayload(savedId ?? undefined)),
       });
       if (!res.ok) throw new Error("PDF generation failed");
       const blob = await res.blob();
-
-      if (savedId) {
-        const arrayBuf = await blob.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuf);
-        let binary = "";
-        for (let i = 0; i < bytes.length; i += 8192) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-        }
-        const blobB64 = btoa(binary);
-        await fetch(`/api/quotes/${savedId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ [`${endpoint}PdfB64`]: blobB64 }),
-        }).catch(() => {});
-      }
-
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -118,7 +96,7 @@ export function QuotePanel() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      alert("PDF generation failed.\n\nThe PDF service runs on a free tier and may need ~30 seconds to wake up after inactivity. Please wait a moment and try again.");
+      alert("PDF generation failed. Please try again.");
     } finally {
       setPdfLoading(null);
     }

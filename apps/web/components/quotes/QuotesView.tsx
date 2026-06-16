@@ -241,8 +241,6 @@ export function QuotesView() {
   };
 
   const handleDownload = async (q: SavedQuote, type: "client" | "internal") => {
-    const pdfUrl = process.env.NEXT_PUBLIC_PDF_SERVICE_URL;
-    if (!pdfUrl) return alert("PDF service not configured.");
     try {
       const syntheticTiers = buildSyntheticTiers(q);
       const Q = computeQuote({
@@ -253,7 +251,7 @@ export function QuotesView() {
         config: q.pricingSnapshot,
         tiers: syntheticTiers,
       });
-      const res = await fetch(`${pdfUrl}/pdf/${type}`, {
+      const res = await fetch(`/api/pdf/${type}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -288,7 +286,7 @@ export function QuotesView() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      alert("PDF generation failed. PDF service may be starting up.");
+      alert("PDF generation failed. Please try again.");
     }
   };
 
