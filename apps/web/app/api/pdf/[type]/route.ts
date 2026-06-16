@@ -21,7 +21,8 @@ export async function POST(req: Request, { params }: { params: { type: string } 
       ? createElement(ClientPdfDoc, { payload })
       : createElement(InternalPdfDoc, { payload });
 
-    const buffer = await renderToBuffer(doc);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buffer = await renderToBuffer(doc as any);
 
     return new Response(buffer, {
       headers: {
