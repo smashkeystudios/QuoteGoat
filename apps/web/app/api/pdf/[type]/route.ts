@@ -24,7 +24,7 @@ export async function POST(req: Request, { params }: { params: { type: string } 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const buffer = await renderToBuffer(doc as any);
 
-    return new Response(buffer, {
+    return new Response(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${(payload.quoteInfo.project || "quote").replace(/[^a-z0-9]/gi, "_")}_${type}.pdf"`,
