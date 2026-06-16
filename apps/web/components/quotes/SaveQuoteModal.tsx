@@ -11,32 +11,46 @@ export function SaveQuoteModal() {
   const setShowSaveQuoteModal = useStore((st) => st.setShowSaveQuoteModal);
   const setShowShareModal = useStore((st) => st.setShowShareModal);
   const pendingShare = useStore((st) => st.pendingShare);
-  const setInfo = useStore((st) => st.setInfo);
+
+  // Write directly to the store — no local state, no closure/stale issues
   const info = useStore((st) => st.info);
+  const setInfo = useStore((st) => st.setInfo);
+
   const ct = useStore((st) => st.ct);
   const cx = useStore((st) => st.cx);
   const trf = useStore((st) => st.trf);
   const pricingConfig = useStore((st) => st.pricingConfig);
   const Q = useComputedQuote();
-
-  const [name, setName] = useState(info.name);
-  const [project, setProject] = useState(info.project);
   const allFeats = useAllFeats();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSave = async () => {
+    const clientName = info.name.trim();
+    const projectName = info.project.trim();
+    if (!clientName && !projectName) {
+      setError("Enter at least a Client Name or Project Name.");
+      return;
+    }
     setSaving(true);
+    setError("");
     try {
       const res = await fetch("/api/quotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          info: { ...info, name: name.trim() || info.name, project: project.trim() || info.project },
+          info,
           ct, cx, trf,
           sel: Q.arr,
           features: Q.arr.map((fid) => {
             const f = allFeats.find((x) => x.id === fid);
-            return { id: fid, name: f?.name ?? fid, tip: f?.tip ?? "", tier: f?.tierId ?? 1, tierLabel: TIER_LABELS[f?.tierId ?? 1] ?? "Tier I" };
+            return {
+              id: fid,
+              name: f?.name ?? fid,
+              tip: f?.tip ?? "",
+              tier: f?.tierId ?? 1,
+              tierLabel: TIER_LABELS[f?.tierId ?? 1] ?? "Tier I",
+            };
           }),
           pricingSnapshot: pricingConfig,
           computed: { total: Q.total, mo: Q.mo, bc: Q.bc, delta: Q.delta },
@@ -44,18 +58,14 @@ export function SaveQuoteModal() {
       });
       if (!res.ok) throw new Error("Save failed");
       const saved = await res.json();
-      const finalName = name.trim() || info.name;
-      const finalProject = project.trim() || info.project;
-      setInfo({ name: finalName, project: finalProject });
       setShowSaveQuoteModal(false);
-      // If opened from "Share Link" button, chain straight into the share modal
       if (pendingShare) {
         setShowShareModal(true, saved.id);
       } else {
         setShowShareModal(false, saved.id);
       }
     } catch {
-      alert("Could not save quote. Please try again.");
+      setError("Could not save quote — please try again.");
     } finally {
       setSaving(false);
     }
@@ -69,17 +79,21 @@ export function SaveQuoteModal() {
   return (
     <div className={s.qqModalBackdrop} onClick={() => setShowSaveQuoteModal(false)}>
       <div className={s.qqModal} onClick={(e) => e.stopPropagation()}>
-        <div className={s.qqModalTitle}>Save Quote</div>
+        <div className={s.qqModalTitle}>
+          {pendingShare ? "Name Quote to Share" : "Save Quote"}
+        </div>
         <div className={s.qqModalSub}>
-          Save this quote to your history. You can reload it, download PDFs, or generate a share link any time.
+          {pendingShare
+            ? "Give this quote a name before generating the share link."
+            : "Save to history — reload, download PDFs, or share any time."}
         </div>
         <div className={b.fld}>
           <label className={b.lbl}>Client Name</label>
           <input
             className={b.inp}
-            placeholder={info.name || "e.g. Acme Corp"}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Acme Corp"
+            value={info.name}
+            onChange={(e) => setInfo({ name: e.target.value })}
             onKeyDown={handleKey}
             autoFocus
           />
@@ -88,12 +102,17 @@ export function SaveQuoteModal() {
           <label className={b.lbl}>Project Name</label>
           <input
             className={b.inp}
-            placeholder={info.project || "e.g. E-commerce Platform"}
-            value={project}
-            onChange={(e) => setProject(e.target.value)}
+            placeholder="e.g. E-commerce Platform"
+            value={info.project}
+            onChange={(e) => setInfo({ project: e.target.value })}
             onKeyDown={handleKey}
           />
         </div>
+        {error && (
+          <div style={{ fontSize: 12, color: "var(--acc)", marginBottom: 12, letterSpacing: "0.02em" }}>
+            {error}
+          </div>
+        )}
         <div className={s.qqModalBtns}>
           <button
             style={{ padding: "13px 20px", flex: "none" }}
@@ -101,7 +120,7 @@ export function SaveQuoteModal() {
             onClick={handleSave}
             disabled={saving}
           >
-            {saving ? "Saving…" : "Save Quote"}
+            {saving ? "Saving…" : pendingShare ? "Save & Share" : "Save Quote"}
           </button>
           <button
             style={{ padding: "13px 20px", flex: "none" }}

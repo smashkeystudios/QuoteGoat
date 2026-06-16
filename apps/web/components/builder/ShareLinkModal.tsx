@@ -15,7 +15,10 @@ export function ShareLinkModal() {
   const clamp = (v: number) => Math.min(14, Math.max(2, v));
 
   const handleGenerate = async () => {
-    if (!shareQuoteId) return;
+    if (!shareQuoteId) {
+      alert("No quote is saved yet. Click 'Save Quote' first, then generate a share link.");
+      return;
+    }
     setGenerating(true);
     try {
       const res = await fetch("/api/share", {

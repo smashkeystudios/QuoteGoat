@@ -117,7 +117,7 @@ export function QuotePanel() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      alert("Could not generate PDF. The PDF service may be starting up — try again in a moment.");
+      alert("PDF generation failed.\n\nThe PDF service runs on a free tier and may need ~30 seconds to wake up after inactivity. Please wait a moment and try again.");
     } finally {
       setPdfLoading(null);
     }
