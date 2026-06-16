@@ -1,20 +1,20 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
-import { useDeleteTemplate } from "@/lib/queries/useTemplates";
-import { PRESET_TEMPLATES } from "@/lib/constants";
-import { SaveTemplateModal } from "./SaveTemplateModal";
+import { useTemplates, useDeleteTemplate } from "@/lib/queries/useTemplates";
+import { TemplateEditModal } from "./TemplateEditModal";
 import s from "@/styles/components/quickquotes.module.css";
 import type { Template } from "@/lib/types";
+
+type ModalMode = Template | "builder" | "scratch" | null;
 
 export function QuickQuotesBar() {
   const showQQ = useStore((st) => st.showQQ);
   const setShowQQ = useStore((st) => st.setShowQQ);
-  const showSaveModal = useStore((st) => st.showSaveModal);
-  const setShowSaveModal = useStore((st) => st.setShowSaveModal);
-  const customTemplates = useStore((st) => st.customTemplates);
   const loadTemplate = useStore((st) => st.loadTemplate);
+  const { data: allTemplates = [] } = useTemplates();
   const { mutate: deleteTemplate } = useDeleteTemplate();
+  const [modalMode, setModalMode] = useState<ModalMode>(null);
   const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,14 +32,16 @@ export function QuickQuotesBar() {
     setShowQQ(false);
   };
 
-  const allGroups = [
-    { label: "Preset Templates", items: PRESET_TEMPLATES, isCustom: false },
-    ...(customTemplates.length > 0
-      ? [{ label: "My Templates", items: customTemplates, isCustom: true }]
-      : []),
-  ];
+  const handleEdit = (e: React.MouseEvent, tpl: Template) => {
+    e.stopPropagation();
+    setShowQQ(false);
+    setModalMode(tpl);
+  };
 
-  const total = PRESET_TEMPLATES.length + customTemplates.length;
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    deleteTemplate(id);
+  };
 
   return (
     <>
@@ -52,55 +54,77 @@ export function QuickQuotesBar() {
           <span className={s.qqTriggerArr}>▼</span>
         </button>
         <span className={s.qqSep} />
-        <span style={{ fontSize: 9, color: "var(--mut)", letterSpacing: "0.07em" }}>
-          {total} template{total !== 1 ? "s" : ""}
+        <span style={{ fontSize: 11, color: "var(--mut)", letterSpacing: "0.07em" }}>
+          {allTemplates.length} template{allTemplates.length !== 1 ? "s" : ""}
         </span>
-        <button className={s.qqSaveBtn} onClick={() => setShowSaveModal(true)}>
-          + Save Current
+        <button
+          className={s.qqSaveBtn}
+          style={{ marginLeft: 16 }}
+          onClick={() => { setShowQQ(false); setModalMode("scratch"); }}
+        >
+          + New
+        </button>
+        <button
+          className={s.qqSaveBtn}
+          onClick={() => { setShowQQ(false); setModalMode("builder"); }}
+        >
+          Save Current
         </button>
 
         {showQQ && (
           <div className={s.qqDropdown}>
-            {allGroups.map((group) => (
-              <div key={group.label}>
-                <div className={s.qqSectionHead}>{group.label}</div>
-                {group.items.map((tpl) => (
-                  <div className={s.qqItem} key={tpl.id} onClick={() => handleLoad(tpl)}>
-                    <div className={s.qqItemBody}>
-                      <div className={s.qqItemName}>{tpl.name}</div>
-                      <div className={s.qqItemDesc}>{tpl.desc}</div>
-                      <div className={s.qqItemTags}>
-                        <span className={`${s.qqItemTag} ${s.ct}`}>{tpl.ct}</span>
-                        <span className={`${s.qqItemTag} ${s.cx}`}>cx {tpl.cx}</span>
-                        {tpl.features.length > 0 && (
-                          <span className={s.qqItemTag}>
-                            {tpl.features.length} feature{tpl.features.length !== 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {tpl.baseCommission > 0 && (
-                          <span className={s.qqItemTag}>+{tpl.baseCommission}% base comm.</span>
-                        )}
-                      </div>
-                    </div>
-                    {group.isCustom && (
-                      <div className={s.qqItemRight} onClick={(e) => e.stopPropagation()}>
-                        <button
-                          className={s.qqItemDel}
-                          onClick={() => deleteTemplate(tpl.id)}
-                          title="Delete template"
-                        >
-                          ×
-                        </button>
-                      </div>
+            {allTemplates.length === 0 && (
+              <div style={{ padding: "20px", fontSize: 13, color: "#5a5550", fontStyle: "italic", textAlign: "center" }}>
+                No templates yet — create one above.
+              </div>
+            )}
+            {allTemplates.map((tpl) => (
+              <div className={s.qqItem} key={tpl.id} onClick={() => handleLoad(tpl)}>
+                <div className={s.qqItemBody}>
+                  <div className={s.qqItemName}>{tpl.name}</div>
+                  {tpl.desc && <div className={s.qqItemDesc}>{tpl.desc}</div>}
+                  <div className={s.qqItemTags}>
+                    <span className={`${s.qqItemTag} ${s.ct}`}>{tpl.ct}</span>
+                    <span className={`${s.qqItemTag} ${s.cx}`}>cx {tpl.cx}</span>
+                    {tpl.features.length > 0 && (
+                      <span className={s.qqItemTag}>
+                        {tpl.features.length} feat.
+                      </span>
+                    )}
+                    {tpl.baseCommission > 0 && (
+                      <span className={s.qqItemTag}>+{tpl.baseCommission}% comm.</span>
+                    )}
+                    {tpl.ct === "hosted" && (tpl.royalty ?? 0) > 0 && (
+                      <span className={s.qqItemTag}>{tpl.royalty}% royalty</span>
                     )}
                   </div>
-                ))}
+                </div>
+                <div className={s.qqItemRight} onClick={(e) => e.stopPropagation()}>
+                  <button
+                    className={s.qqItemDel}
+                    style={{ color: "#6a6060", fontSize: 12, padding: "3px 7px" }}
+                    onClick={(e) => handleEdit(e, tpl)}
+                    title="Edit template"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    className={s.qqItemDel}
+                    onClick={(e) => handleDelete(e, tpl.id)}
+                    title="Delete template"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
-      {showSaveModal && <SaveTemplateModal />}
+
+      {modalMode !== null && (
+        <TemplateEditModal mode={modalMode} onClose={() => setModalMode(null)} />
+      )}
     </>
   );
 }

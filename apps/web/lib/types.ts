@@ -49,6 +49,7 @@ export interface Template {
   trf: number;
   features: string[];
   baseCommission: number;
+  royalty?: number;
   isPreset: boolean;
   custom?: boolean;
 }

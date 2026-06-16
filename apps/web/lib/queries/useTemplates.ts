@@ -7,7 +7,7 @@ import type { Template } from "../types";
 const STALE = 2 * 60 * 1000;
 
 export function useTemplates() {
-  const setCustomTemplates = useStore((s) => s.setCustomTemplates);
+  const setTemplates = useStore((s) => s.setTemplates);
   return useQuery<Template[]>({
     queryKey: ["templates"],
     queryFn: async () => {
@@ -17,8 +17,7 @@ export function useTemplates() {
     },
     staleTime: STALE,
     select: (data) => {
-      const custom = data.filter((t) => !t.isPreset);
-      setCustomTemplates(custom);
+      setTemplates(data);
       return data;
     },
   });
@@ -38,6 +37,25 @@ export function useCreateTemplate() {
     },
     onSuccess: (tpl) => {
       addTemplate(tpl);
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+    },
+  });
+}
+
+export function useUpdateTemplate() {
+  const updateTemplate = useStore((s) => s.updateTemplate);
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: Partial<Template> & { id: string }) => {
+      const res = await fetch(`/api/templates/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) throw new Error("Failed to update template");
+      return res.json() as Promise<Template>;
+    },
+    onSuccess: (tpl) => {
+      updateTemplate(tpl);
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
   });

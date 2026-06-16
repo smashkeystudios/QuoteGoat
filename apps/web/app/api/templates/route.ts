@@ -21,12 +21,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, desc = "", ct, cx = 1, trf = 1, features = [], baseCommission = 0 } = body;
+  const { name, desc = "", ct, cx = 1, trf = 1, features = [], baseCommission = 0, royalty = 0 } = body;
   if (!name || !ct) return NextResponse.json({ error: "Missing name or ct" }, { status: 400 });
 
   const id = "c" + Date.now();
   const template: Template = {
-    id, name, desc, ct, cx, trf, features, baseCommission,
+    id, name, desc, ct, cx, trf, features, baseCommission, royalty,
     isPreset: false, custom: true,
   };
   const templates = await seedAndGet();
