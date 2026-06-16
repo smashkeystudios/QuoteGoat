@@ -26,6 +26,7 @@ export const useStore = create<StoreState>()(
         ct: state.ct,
         cx: state.cx,
         trf: state.trf,
+        royalty: state.royalty,
         info: state.info,
         notes: state.notes,
         sel: Array.from(state.sel),   // Set → Array for JSON

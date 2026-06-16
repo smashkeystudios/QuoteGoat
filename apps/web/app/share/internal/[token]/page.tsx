@@ -115,6 +115,7 @@ export default async function InternalSharePage({ params }: { params: { token: s
 
 function buildInternalHtml(quote: SavedQuote): string {
   const { info, ct, cx, trf, sel, features, pricingSnapshot } = quote;
+  const royalty = quote.royalty ?? 0;
 
   const syntheticTiers = [1, 2, 3].map((id) => ({
     id, label: `Tier ${id}`, cls: `t${id}` as "t1" | "t2" | "t3", tooltip: "",
@@ -123,7 +124,7 @@ function buildInternalHtml(quote: SavedQuote): string {
       .map((f) => ({ id: f.id, name: f.name, tip: f.tip ?? "", tierId: id, sortOrder: 0 })),
   }));
 
-  const Q = computeQuote({ ct, sel: new Set(sel), cx, trf, config: pricingSnapshot, tiers: syntheticTiers });
+  const Q = computeQuote({ ct, sel: new Set(sel), cx, trf, royalty, config: pricingSnapshot, tiers: syntheticTiers });
 
   const ctLabel = ct === "handoff" ? "Handoff" : "Hosted Retainer";
   const hasMonthly = ct === "hosted" && Q.mo > 0;
@@ -136,8 +137,8 @@ function buildInternalHtml(quote: SavedQuote): string {
   const cxLabel = cx === 1 ? "Standard (×1)" : `${cx} (×${cxM(cx, cxRate).toFixed(2)})`;
   const trfLabel = trf === 1 ? "Standard (×1)" : `${trf} (×${trfM(trf, trfRate).toFixed(2)})`;
 
-  // LCV projections (upfront + recurring)
-  const lcv = (months: number) => Q.total + Q.mo * months;
+  // LCV projections (upfront + recurring, using moFinal which includes royalty)
+  const lcv = (months: number) => Q.total + Q.moFinal * months;
 
   const featureRows = sel.map((fid) => {
     const f = featureMap[fid];
@@ -195,7 +196,7 @@ function buildInternalHtml(quote: SavedQuote): string {
       <div class="hero-total">
         <div class="hero-total-lbl">Total Client Price</div>
         <div class="hero-total-amt">${fmt(Q.total)}</div>
-        ${hasMonthly ? `<div class="hero-mo-lbl">Monthly Retainer</div><div class="hero-mo">${fmt(Q.mo)}<span style="font-size:14px;color:#4fa874">/mo</span></div>` : ""}
+        ${hasMonthly ? `<div class="hero-mo-lbl">Monthly Retainer</div><div class="hero-mo">${fmt(Q.moFinal)}<span style="font-size:14px;color:#4fa874">/mo</span></div>${Q.royaltyAmt > 0 ? `<div style="font-size:11px;color:#c9a84c;margin-top:2px">incl. ${fmt(Q.royaltyAmt)} royalty (${royalty}%)</div>` : ""}` : ""}
       </div>
     </div>
 
@@ -266,6 +267,27 @@ function buildInternalHtml(quote: SavedQuote): string {
           </div>
         </div>
 
+        ${hasMonthly && royalty > 0 ? `
+        <div class="panel" style="margin-top:16px">
+          <div class="panel-lbl">Monthly Royalty</div>
+          <div class="stat-row">
+            <span class="stat-lbl">Royalty Rate</span>
+            <span class="stat-val gld">${royalty}%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-lbl">Base Monthly</span>
+            <span class="stat-val">${fmt(Q.mo)}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-lbl">Royalty Amount</span>
+            <span class="stat-val gld">${fmt(Q.royaltyAmt)}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-lbl">Final Monthly</span>
+            <span class="stat-val grn">${fmt(Q.moFinal)}</span>
+          </div>
+        </div>` : ""}
+
         ${hasMonthly ? `
         <div class="panel" style="margin-top:16px">
           <div class="panel-lbl">LCV Projections</div>
@@ -330,8 +352,17 @@ function buildInternalHtml(quote: SavedQuote): string {
           </div>
           ${hasMonthly ? `
           <div class="tbl-foot-row" style="border-top:1px solid #3a2e1a;padding-top:12px;margin-top:4px">
-            <span class="tbl-foot-lbl">Monthly Retainer (client)</span>
-            <span class="tbl-foot-amt grn">${fmt(Q.mo)}<span style="font-size:14px;color:#7a7267">/mo</span></span>
+            <span class="tbl-foot-lbl">Monthly (base)</span>
+            <span class="tbl-foot-amt" style="font-size:16px">${fmt(Q.mo)}<span style="font-size:12px;color:#7a7267">/mo</span></span>
+          </div>
+          ${royalty > 0 ? `
+          <div class="tbl-foot-row">
+            <span class="tbl-foot-lbl">Royalty (${royalty}%)</span>
+            <span class="tbl-foot-amt gld" style="font-size:16px">+${fmt(Q.royaltyAmt)}</span>
+          </div>` : ""}
+          <div class="tbl-foot-row" style="border-top:1px solid #3a2e1a;padding-top:8px;margin-top:2px">
+            <span class="tbl-foot-lbl">Monthly Total (client)</span>
+            <span class="tbl-foot-amt grn">${fmt(Q.moFinal)}<span style="font-size:14px;color:#7a7267">/mo</span></span>
           </div>` : ""}
         </div>
       </div>

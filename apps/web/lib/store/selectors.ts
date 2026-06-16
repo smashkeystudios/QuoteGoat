@@ -9,13 +9,14 @@ export const useComputedQuote = (): ComputedQuote => {
   const sel = useStore((s) => s.sel);
   const cx = useStore((s) => s.cx);
   const trf = useStore((s) => s.trf);
+  const royalty = useStore((s) => s.royalty);
   const config = useStore((s) => s.pricingConfig);
   const tiers = useStore((s) => s.tiers);
 
   return useMemo(
-    () => computeQuote({ ct, sel, cx, trf, config, tiers }),
+    () => computeQuote({ ct, sel, cx, trf, royalty, config, tiers }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ct, sel, cx, trf, config, tiers]
+    [ct, sel, cx, trf, royalty, config, tiers]
   );
 };
 

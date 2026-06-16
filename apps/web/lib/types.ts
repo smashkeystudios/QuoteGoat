@@ -65,9 +65,11 @@ export interface ComputedQuote {
   bcCommPct: number;
   upMod: number;
   upBase: number;
-  mo: number;
+  mo: number;          // monthly before royalty
   moBase: number;
   moFeats: number;
+  moFinal: number;     // monthly after royalty (= mo when handoff or royalty=0)
+  royaltyAmt: number;  // dollar amount added by royalty
   total: number;
   totalNoMod: number;
   delta: number;
@@ -129,6 +131,7 @@ export interface SavedQuote {
   ct: ContractType;
   cx: number;
   trf: number;
+  royalty?: number;
   sel: string[];
   features: SavedQuoteFeature[];
   notes?: string[];
@@ -136,6 +139,7 @@ export interface SavedQuote {
   computed: {
     total: number;
     mo: number;
+    moFinal: number;
     bc: number;
     delta: number;
   };

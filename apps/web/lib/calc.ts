@@ -26,10 +26,11 @@ export function computeQuote(params: {
   sel: Set<string>;
   cx: number;
   trf: number;
+  royalty?: number;
   config: PricingConfig;
   tiers: Tier[];
 }): ComputedQuote {
-  const { ct, sel, cx, trf, config, tiers } = params;
+  const { ct, sel, cx, trf, royalty = 0, config, tiers } = params;
   const featMap = buildFeatMap(tiers);
   const cmx = cxM(cx, (config.cxRate ?? 15) / 100);
   const tmx = trfM(trf, (config.trfRate ?? 20) / 100);
@@ -55,6 +56,8 @@ export function computeQuote(params: {
     moFeats += moFeat(fid);
   });
   const mo = r5(moBase + moFeats);
+  const moFinal = ct === "hosted" && mo > 0 && royalty > 0 ? r5(mo * (1 + royalty / 100)) : mo;
+  const royaltyAmt = moFinal - mo;
 
   return {
     bc,
@@ -65,6 +68,8 @@ export function computeQuote(params: {
     mo,
     moBase: r5(moBase),
     moFeats,
+    moFinal,
+    royaltyAmt,
     total: bc + upMod,
     totalNoMod: bcRaw + upBase,
     delta: (bc - bcRaw) + (upMod - upBase),

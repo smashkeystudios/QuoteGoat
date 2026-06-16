@@ -12,6 +12,7 @@ export function QuotePanel() {
   const ct = useStore((st) => st.ct);
   const cx = useStore((st) => st.cx);
   const trf = useStore((st) => st.trf);
+  const royalty = useStore((st) => st.royalty);
   const info = useStore((st) => st.info);
   const pricingConfig = useStore((st) => st.pricingConfig);
   const setShowSaveQuoteModal = useStore((st) => st.setShowSaveQuoteModal);
@@ -62,11 +63,11 @@ export function QuotePanel() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           info,
-          ct, cx, trf,
+          ct, cx, trf, royalty,
           sel: Q.arr,
           features: buildFeatureSnapshot(),
           pricingSnapshot: pricingConfig,
-          computed: { total: Q.total, mo: Q.mo, bc: Q.bc, delta: Q.delta },
+          computed: { total: Q.total, mo: Q.mo, moFinal: Q.moFinal, bc: Q.bc, delta: Q.delta },
         }),
       });
       if (!res.ok) return null;
@@ -197,16 +198,21 @@ export function QuotePanel() {
               <span className={s.qMoLbl}>Monthly Retainer</span>
               <div style={{ textAlign: "right" }}>
                 <span className={s.qMoAmt}>
-                  {fmt(Q.mo)}<span style={{ fontSize: 13, color: "var(--mut)" }}>/mo</span>
+                  {fmt(Q.moFinal)}<span style={{ fontSize: 13, color: "var(--mut)" }}>/mo</span>
                 </span>
+                {Q.royaltyAmt > 0 && (
+                  <div style={{ fontSize: 10, color: "var(--gold)", marginTop: 2 }}>
+                    incl. {fmt(Q.royaltyAmt)} royalty ({royalty}%)
+                  </div>
+                )}
                 {Q.moBase > 0 && (
-                  <div style={{ fontSize: 10, color: "var(--mut)", marginTop: 2 }}>
-                    incl. {fmt(Q.moBase)} base
+                  <div style={{ fontSize: 10, color: "var(--mut)", marginTop: 1 }}>
+                    base {fmt(Q.moBase)} · feats {fmt(Q.moFeats)}
                   </div>
                 )}
               </div>
             </div>
-            {/* LCV — internal only */}
+            {/* LCV */}
             <div style={{ borderTop: "1px dashed var(--line2)", marginTop: 8, paddingTop: 10 }}>
               <div style={{ fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--mut)", marginBottom: 7 }}>
                 LCV Projection
@@ -217,7 +223,7 @@ export function QuotePanel() {
                     {yr}yr
                   </span>
                   <span style={{ fontFamily: "var(--serif)", fontSize: yr === 5 ? 16 : 13, color: yr === 5 ? "var(--grn)" : "var(--ink)" }}>
-                    {fmt(Q.total + Q.mo * 12 * yr)}
+                    {fmt(Q.total + Q.moFinal * 12 * yr)}
                   </span>
                 </div>
               ))}

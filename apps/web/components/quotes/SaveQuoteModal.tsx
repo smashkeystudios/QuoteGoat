@@ -19,6 +19,7 @@ export function SaveQuoteModal() {
   const ct = useStore((st) => st.ct);
   const cx = useStore((st) => st.cx);
   const trf = useStore((st) => st.trf);
+  const royalty = useStore((st) => st.royalty);
   const notes = useStore((st) => st.notes);
   const pricingConfig = useStore((st) => st.pricingConfig);
   const Q = useComputedQuote();
@@ -41,7 +42,7 @@ export function SaveQuoteModal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           info,
-          ct, cx, trf,
+          ct, cx, trf, royalty,
           notes,
           sel: Q.arr,
           features: Q.arr.map((fid) => {
@@ -55,7 +56,7 @@ export function SaveQuoteModal() {
             };
           }),
           pricingSnapshot: pricingConfig,
-          computed: { total: Q.total, mo: Q.mo, bc: Q.bc, delta: Q.delta },
+          computed: { total: Q.total, mo: Q.mo, moFinal: Q.moFinal, bc: Q.bc, delta: Q.delta },
         }),
       });
       if (!res.ok) throw new Error("Save failed");

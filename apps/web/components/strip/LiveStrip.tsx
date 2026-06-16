@@ -57,20 +57,23 @@ export function LiveStrip() {
           <div className={s.sc}>
             <div className={s.scLbl}>Monthly</div>
             <div className={`${s.scVal} ${s.grn}`}>
-              {fmt(Q.mo)}<span style={{ fontSize: 12, color: "#4a4640" }}>/mo</span>
+              {fmt(Q.moFinal)}<span style={{ fontSize: 12, color: "#4a4640" }}>/mo</span>
             </div>
+            {Q.royaltyAmt > 0 && (
+              <div style={{ fontSize: 10, color: "#6a5a20", marginTop: 3 }}>+{fmt(Q.royaltyAmt)} royalty</div>
+            )}
           </div>
         )}
         {hasMonthly && (
           <div className={s.sc}>
             <div className={s.scLbl}>LCV 1yr</div>
-            <div className={`${s.scVal} ${s.grn}`}>{fmt(Q.total + Q.mo * 12)}</div>
+            <div className={`${s.scVal} ${s.grn}`}>{fmt(Q.total + Q.moFinal * 12)}</div>
           </div>
         )}
         {hasMonthly && (
           <div className={s.sc}>
             <div className={s.scLbl}>LCV 2yr</div>
-            <div className={`${s.scVal} ${s.grn}`}>{fmt(Q.total + Q.mo * 24)}</div>
+            <div className={`${s.scVal} ${s.grn}`}>{fmt(Q.total + Q.moFinal * 24)}</div>
           </div>
         )}
         <div className={s.sc} style={{ minWidth: 130, flex: 1 }}>
@@ -144,22 +147,23 @@ export function LiveStrip() {
               <>
                 <div className={s.expCell}>
                   <div className={s.expLbl}>Monthly Retainer</div>
-                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.mo)}<span style={{ fontSize: 12, color: "#4a4540" }}>/mo</span></div>
-                  <div className={s.expSub}>{fmt(Q.mo * 12)}/yr</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.moFinal)}<span style={{ fontSize: 12, color: "#4a4540" }}>/mo</span></div>
+                  {Q.royaltyAmt > 0 && <div className={s.expSub} style={{ color: "#c9a84c" }}>incl. {fmt(Q.royaltyAmt)} royalty</div>}
+                  <div className={s.expSub}>{fmt(Q.moFinal * 12)}/yr</div>
                 </div>
                 <div className={s.expCell}>
                   <div className={s.expLbl}>LCV 1 Year</div>
-                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.mo * 12)}</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.moFinal * 12)}</div>
                   <div className={s.expSub}>upfront + 12 mo</div>
                 </div>
                 <div className={s.expCell}>
                   <div className={s.expLbl}>LCV 2 Years</div>
-                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.mo * 24)}</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.moFinal * 24)}</div>
                   <div className={s.expSub}>upfront + 24 mo</div>
                 </div>
                 <div className={s.expCell}>
                   <div className={s.expLbl}>LCV 3 Years</div>
-                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.mo * 36)}</div>
+                  <div className={`${s.expVal} ${s.grn}`} style={{ fontSize: 22 }}>{fmt(Q.total + Q.moFinal * 36)}</div>
                   <div className={s.expSub}>upfront + 36 mo</div>
                 </div>
               </>

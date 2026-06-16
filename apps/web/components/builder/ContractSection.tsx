@@ -11,10 +11,12 @@ export function ContractSection() {
   const ct = useStore((st) => st.ct);
   const cx = useStore((st) => st.cx);
   const trf = useStore((st) => st.trf);
+  const royalty = useStore((st) => st.royalty);
   const baseCommission = useStore((st) => st.pricingConfig.baseCommission);
   const setCt = useStore((st) => st.setCt);
   const setCx = useStore((st) => st.setCx);
   const setTrf = useStore((st) => st.setTrf);
+  const setRoyalty = useStore((st) => st.setRoyalty);
   const setBaseCommission = useStore((st) => st.setBaseCommission);
   const pricingConfig = useStore((st) => st.pricingConfig);
   const Q = useComputedQuote();
@@ -140,6 +142,44 @@ export function ContractSection() {
                 ))}
               </div>
               <div className={s.slNote}>×{trfM(trf).toFixed(2)} monthly multiplier</div>
+            </div>
+          )}
+
+          {/* Royalty (hosted only) */}
+          {ct === "hosted" && (
+            <div className={s.fld}>
+              <div className={s.slRow}>
+                <span className={s.slLabel}>
+                  Monthly Royalty
+                  <Tooltip text="Applied on top of all monthly costs after other calculations. Acts as a platform/maintenance royalty. 0–30%." />
+                </span>
+                <span className={s.slVal} style={{ color: "var(--gold)", fontSize: 22 }}>{royalty}%</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <button
+                  className={s.modPctBtn}
+                  onPointerDown={(e) => { e.preventDefault(); setRoyalty(royalty - 1); }}
+                  disabled={royalty <= 0}
+                >−</button>
+                <input
+                  type="range"
+                  className={s.sl}
+                  min={0} max={30} step={1}
+                  value={royalty}
+                  onChange={(e) => setRoyalty(Number(e.target.value))}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  className={s.modPctBtn}
+                  onPointerDown={(e) => { e.preventDefault(); setRoyalty(royalty + 1); }}
+                  disabled={royalty >= 30}
+                >+</button>
+              </div>
+              {royalty > 0 && Q.mo > 0 && (
+                <div className={s.slNote}>
+                  {fmt(Q.mo)} + {royalty}% → {fmt(Q.moFinal)} /mo (+{fmt(Q.royaltyAmt)})
+                </div>
+              )}
             </div>
           )}
         </div>

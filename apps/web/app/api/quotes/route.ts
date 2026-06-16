@@ -22,11 +22,12 @@ export async function POST(req: Request) {
     ct: body.ct,
     cx: body.cx,
     trf: body.trf,
+    royalty: body.royalty ?? 0,
     sel: body.sel,
     features: body.features ?? [],
     notes: body.notes ?? [],
     pricingSnapshot: body.pricingSnapshot,
-    computed: body.computed,
+    computed: { ...body.computed, moFinal: body.computed?.moFinal ?? body.computed?.mo ?? 0 },
   };
   await setKV(`quote:${id}`, quote);
   await prependToList("quotes:index", id);

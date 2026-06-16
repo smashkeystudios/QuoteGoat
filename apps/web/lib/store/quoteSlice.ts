@@ -7,6 +7,7 @@ export interface QuoteSlice {
   sel: Set<string>;
   cx: number;
   trf: number;
+  royalty: number;
   info: QuoteInfo;
   notes: string[];
 
@@ -15,6 +16,7 @@ export interface QuoteSlice {
   selectFeatures: (ids: string[]) => void;
   setCx: (v: number) => void;
   setTrf: (v: number) => void;
+  setRoyalty: (v: number) => void;
   setInfo: (patch: Partial<QuoteInfo>) => void;
   addNote: () => void;
   updateNote: (idx: number, text: string) => void;
@@ -35,6 +37,7 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   sel: new Set<string>(),
   cx: 1,
   trf: 1,
+  royalty: 5,
   info: defaultInfo,
   notes: [],
 
@@ -48,6 +51,7 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   selectFeatures: (ids) => set({ sel: new Set(ids) }),
   setCx: (cx) => set({ cx }),
   setTrf: (trf) => set({ trf }),
+  setRoyalty: (royalty) => set({ royalty: Math.min(30, Math.max(0, Math.round(royalty))) }),
   setInfo: (patch) => set((s) => ({ info: { ...s.info, ...patch } })),
   addNote: () => set((s) => ({ notes: [...s.notes, ""] })),
   updateNote: (idx, text) =>
@@ -55,7 +59,7 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   deleteNote: (idx) =>
     set((s) => ({ notes: s.notes.filter((_, i) => i !== idx) })),
   resetQuote: () =>
-    set({ ct: "handoff", sel: new Set(), cx: 1, trf: 1, info: defaultInfo, notes: [] }),
+    set({ ct: "handoff", sel: new Set(), cx: 1, trf: 1, royalty: 5, info: defaultInfo, notes: [] }),
   loadTemplate: (tpl) =>
     set({
       ct: tpl.ct,
@@ -69,6 +73,7 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
       sel: new Set(q.sel),
       cx: q.cx,
       trf: q.trf,
+      royalty: q.royalty ?? 5,
       info: q.info,
       notes: q.notes ?? [],
     }),

@@ -28,10 +28,11 @@ function buildSyntheticTiers(q: SavedQuote) {
 
 function InternalPreviewModal({ q, onClose }: { q: SavedQuote; onClose: () => void }) {
   const tiers = buildSyntheticTiers(q);
-  const Q = computeQuote({ ct: q.ct, sel: new Set(q.sel), cx: q.cx, trf: q.trf, config: q.pricingSnapshot, tiers });
+  const royalty = q.royalty ?? 0;
+  const Q = computeQuote({ ct: q.ct, sel: new Set(q.sel), cx: q.cx, trf: q.trf, royalty, config: q.pricingSnapshot, tiers });
 
   const featureMap = Object.fromEntries(q.features.map((f) => [f.id, f]));
-  const hasMonthly = q.ct === "hosted" && Q.mo > 0;
+  const hasMonthly = q.ct === "hosted" && Q.moFinal > 0;
   const ctLabel = q.ct === "handoff" ? "Handoff" : "Hosted Retainer";
   const commPctDisplay = `${(Q.bcCommPct * 100).toFixed(0)}%`;
   const effectiveMargin = Q.total > 0 ? ((Q.delta / Q.total) * 100).toFixed(1) : "0.0";
@@ -52,7 +53,8 @@ function InternalPreviewModal({ q, onClose }: { q: SavedQuote; onClose: () => vo
           <div style={{ textAlign: "right", flexShrink: 0 }}>
             <div className={s.previewTotalLbl}>Total Client Price</div>
             <div className={s.previewTotalAmt}>{fmt(Q.total)}</div>
-            {hasMonthly && <div className={s.previewMo}>{fmt(Q.mo)}<span style={{ fontSize: 12, color: "var(--mut)" }}>/mo</span></div>}
+            {hasMonthly && <div className={s.previewMo}>{fmt(Q.moFinal)}<span style={{ fontSize: 12, color: "var(--mut)" }}>/mo</span></div>}
+            {hasMonthly && Q.royaltyAmt > 0 && <div style={{ fontSize: 10, color: "#c9a84c", marginTop: 2 }}>incl. {fmt(Q.royaltyAmt)} royalty ({royalty}%)</div>}
           </div>
           <button className={s.previewClose} onClick={onClose}>✕</button>
         </div>
@@ -90,6 +92,22 @@ function InternalPreviewModal({ q, onClose }: { q: SavedQuote; onClose: () => vo
                 </div>
               ))}
 
+              {hasMonthly && royalty > 0 && (
+                <>
+                  <div className={s.previewPanelLbl} style={{ marginTop: 16 }}>Monthly Royalty</div>
+                  {[
+                    ["Royalty Rate", `${royalty}%`, "gld"],
+                    ["Base Monthly", fmt(Q.mo), ""],
+                    ["Royalty Amount", fmt(Q.royaltyAmt), "gld"],
+                    ["Final Monthly", fmt(Q.moFinal), "grn"],
+                  ].map(([lbl, val, cls]) => (
+                    <div key={lbl as string} className={s.previewStatRow}>
+                      <span className={s.previewStatLbl}>{lbl}</span>
+                      <span className={`${s.previewStatVal} ${cls ? s[cls as string] : ""}`}>{val}</span>
+                    </div>
+                  ))}
+                </>
+              )}
               {hasMonthly && (
                 <>
                   <div className={s.previewPanelLbl} style={{ marginTop: 16 }}>LCV Projections</div>
@@ -97,7 +115,7 @@ function InternalPreviewModal({ q, onClose }: { q: SavedQuote; onClose: () => vo
                     {[["1yr", 12], ["2yr", 24], ["3yr", 36], ["5yr", 60]].map(([label, months]) => (
                       <div key={label as string} className={s.lcvCell}>
                         <div className={s.lcvYr}>{label}</div>
-                        <div className={s.lcvAmt}>{fmt(lcv(months as number))}</div>
+                        <div className={s.lcvAmt}>{fmt(Q.total + Q.moFinal * (months as number))}</div>
                       </div>
                     ))}
                   </div>
@@ -185,8 +203,8 @@ function InternalPreviewModal({ q, onClose }: { q: SavedQuote; onClose: () => vo
                 </div>
                 {hasMonthly && (
                   <div className={s.previewTotalRow} style={{ color: "var(--grn)" }}>
-                    <span>Monthly retainer</span>
-                    <span>{fmt(Q.mo)}/mo</span>
+                    <span>Monthly total{Q.royaltyAmt > 0 ? ` (incl. ${royalty}% royalty)` : ""}</span>
+                    <span>{fmt(Q.moFinal)}/mo</span>
                   </div>
                 )}
               </div>
