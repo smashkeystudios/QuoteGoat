@@ -120,6 +120,8 @@
 .qbtn:active { transform: scale(0.98); opacity: 0.8; }
 .qbtnP { background: var(--acc); color: white; }
 .qbtnI { background: var(--p3); color: var(--mut); border: 1px solid var(--line2); }
+.qbtnD { background: transparent; color: var(--acc); border: 1px solid var(--acc); }
+.qbtnD:hover { background: var(--acc); color: white; }
 
 /* Desktop builder grid */
 @media (min-width: 900px) {

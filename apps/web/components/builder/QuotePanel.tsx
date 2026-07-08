@@ -18,6 +18,7 @@ export function QuotePanel() {
   const setShowSaveQuoteModal = useStore((st) => st.setShowSaveQuoteModal);
   const setShowShareModal    = useStore((st) => st.setShowShareModal);
   const shareQuoteId = useStore((st) => st.shareQuoteId);
+  const resetQuote = useStore((st) => st.resetQuote);
   const Q = useComputedQuote();
   const allFeats = useAllFeats();
 
@@ -110,6 +111,12 @@ export function QuotePanel() {
     // No saved quote yet — open Save modal first; it will chain into Share modal
     setShowSaveQuoteModal(true, true);
   }, [shareQuoteId, setShowShareModal, setShowSaveQuoteModal]);
+
+  const handleClear = useCallback(() => {
+    if (confirm("Clear this quote? This resets features, client details, and notes.")) {
+      resetQuote();
+    }
+  }, [resetQuote]);
 
   const busy = pdfLoading !== null;
 
@@ -240,6 +247,16 @@ export function QuotePanel() {
             onClick={handleShare}
           >
             Share Link
+          </button>
+        </div>
+
+        {/* Clear */}
+        <div className={s.qBtns} style={{ marginTop: 8 }}>
+          <button
+            className={`${s.qbtn} ${s.qbtnD}`}
+            onClick={handleClear}
+          >
+            Clear Quote
           </button>
         </div>
       </div>

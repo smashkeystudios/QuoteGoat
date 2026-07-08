@@ -24,15 +24,15 @@ const cxLabel = (cx: number) =>
   (["", "Minimal", "Low", "Medium", "High", "Enterprise"] as const)[cx] ?? cx.toString();
 
 const S = StyleSheet.create({
-  page:     { backgroundColor: C.paper, fontFamily: "Helvetica", fontSize: 10, color: C.ink, paddingBottom: 40, paddingHorizontal: 51 },
-  banner:   { backgroundColor: C.intRed, color: "white", paddingVertical: 6, paddingHorizontal: 51, marginHorizontal: -51, fontSize: 8, letterSpacing: 2, marginBottom: 14 },
-  label:    { fontSize: 8, letterSpacing: 1.5, color: C.mut, marginBottom: 5 },
-  redLabel: { fontSize: 8, letterSpacing: 1.5, color: C.intRed, marginBottom: 5 },
+  page:     { backgroundColor: C.paper, fontFamily: "Helvetica", fontSize: 8.5, color: C.ink, paddingBottom: 20, paddingHorizontal: 34 },
+  banner:   { backgroundColor: C.intRed, color: "white", paddingVertical: 4, paddingHorizontal: 34, marginHorizontal: -34, fontSize: 6.5, letterSpacing: 1.5, marginBottom: 8 },
+  label:    { fontSize: 6.5, letterSpacing: 1.2, color: C.mut },
+  redLabel: { fontSize: 6.5, letterSpacing: 1.2, color: C.intRed },
   flex1:    { flex: 1 },
   row:      { flexDirection: "row" },
   line:     { borderBottomWidth: 1, borderBottomColor: C.line },
-  boldLine: { borderBottomWidth: 2, borderBottomColor: C.ink },
-  redTop:   { borderTopWidth: 3, borderTopColor: C.intRed },
+  boldLine: { borderBottomWidth: 1.5, borderBottomColor: C.ink },
+  redTop:   { borderTopWidth: 2, borderTopColor: C.intRed },
   mut:      { color: C.mut },
   gold:     { color: C.gold },
   grn:      { color: C.grn },
@@ -43,45 +43,36 @@ function Banner() {
   return <Text style={S.banner}>{"⚠ INTERNAL — NOT FOR CLIENT DISTRIBUTION"}</Text>;
 }
 
-function IntCover({ payload }: { payload: PdfPayload }) {
+function Header({ payload }: { payload: PdfPayload }) {
   const { quoteInfo: qi, contractType: ct } = payload;
   return (
-    <Page size="A4" style={[S.page, { paddingTop: 0 }]}>
-      <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between" }}>
+    <View>
+      <Banner />
+      <View style={[S.row, { justifyContent: "space-between", alignItems: "flex-start" }]}>
         <View>
-          <Banner />
-          <Text style={[S.label, { marginBottom: 28 }]}>INTERNAL SUMMARY · QUOTEGOAT</Text>
-          <Text style={{ fontFamily: "Times-Roman", fontSize: 40, lineHeight: 1.08, marginBottom: 4 }}>{qi.project || "Project"}</Text>
-          <Text style={{ fontFamily: "Times-Italic", fontSize: 40, lineHeight: 1.08, color: C.intRed, marginBottom: 28 }}>Internal Analysis</Text>
-          <View style={{ gap: 6 }}>
-            <Text style={S.label}>{"CLIENT: " + UP(qi.name || "Unknown")}</Text>
-            <Text style={S.label}>{"DATE: " + qi.date}</Text>
-            <Text style={S.label}>{"CONTRACT: " + UP(ct === "handoff" ? "Handoff" : "Hosted Retainer")}</Text>
-          </View>
+          <Text style={[S.label, { marginBottom: 4 }]}>INTERNAL SUMMARY · QUOTEGOAT</Text>
+          <Text style={{ fontFamily: "Times-Roman", fontSize: 20, lineHeight: 1.05 }}>
+            {qi.project || "Project"} <Text style={{ fontFamily: "Times-Italic", color: C.intRed }}>Internal Analysis</Text>
+          </Text>
         </View>
-        <View>
-          <View style={[S.redTop, { paddingTop: 14 }]} />
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
-            <View>
-              <Text style={{ fontFamily: "Times-Roman", fontSize: 15 }}>Jakomu Incorporated</Text>
-              <Text style={[S.label, { marginTop: 2, marginBottom: 0 }]}>INTERNAL USE ONLY</Text>
-            </View>
-            <Text style={[S.redLabel, { textAlign: "right", marginBottom: 0 }]}>CONFIDENTIAL</Text>
-          </View>
+        <View style={{ alignItems: "flex-end", gap: 2 }}>
+          <Text style={S.label}>{"CLIENT: " + UP(qi.name || "Unknown")}</Text>
+          <Text style={S.label}>{"DATE: " + qi.date}</Text>
+          <Text style={S.label}>{"CONTRACT: " + UP(ct === "handoff" ? "Handoff" : "Hosted Retainer")}</Text>
         </View>
       </View>
-    </Page>
+    </View>
   );
 }
 
-function ConfigPage({ payload }: { payload: PdfPayload }) {
-  const { contractType: ct, complexity, traffic, computed, featureRows } = payload;
+function ConfigStrip({ payload }: { payload: PdfPayload }) {
+  const { contractType: ct, complexity, traffic, computed } = payload;
   const cxMult = (1 + (complexity - 1) * 0.15).toFixed(3);
   const trfMult = (1 + ((traffic ?? 1) - 1) * 0.20).toFixed(3);
 
   const cells = [
-    { label: "COMPLEXITY", val: `${cxMult}×`, sub: `Level ${complexity}/5 — ${cxLabel(complexity)}` },
-    ...(ct === "hosted" ? [{ label: "TRAFFIC", val: `${trfMult}×`, sub: `Level ${traffic}/5` }] : []),
+    { label: "COMPLEXITY", val: `${cxMult}×`, sub: `Lvl ${complexity}/5 — ${cxLabel(complexity)}` },
+    ...(ct === "hosted" ? [{ label: "TRAFFIC", val: `${trfMult}×`, sub: `Lvl ${traffic}/5` }] : []),
     {
       label: "BASE COMMISSION",
       val: computed.bcCommPct > 0 ? pct(computed.bcCommPct * 100) : "None",
@@ -91,194 +82,156 @@ function ConfigPage({ payload }: { payload: PdfPayload }) {
   ];
 
   return (
-    <Page size="A4" style={[S.page, { paddingTop: 0 }]}>
-      <Banner />
-      <Text style={S.redLabel}>PRICING CONFIGURATION</Text>
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 26, marginBottom: 20 }}>Multipliers & Config</Text>
-
-      {/* Metric cells */}
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
-        {cells.map((c) => (
-          <View key={c.label} style={{ backgroundColor: "#f0ece3", padding: 12, minWidth: 130, flex: 1 }}>
-            <Text style={[S.label, { marginBottom: 6 }]}>{c.label}</Text>
-            <Text style={{ fontFamily: "Times-Roman", fontSize: 26, color: c.valColor ?? C.ink, lineHeight: 1 }}>{c.val}</Text>
-            <Text style={[S.mut, { fontSize: 9, marginTop: 3 }]}>{c.sub}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Feature commission table */}
-      <View style={{ borderTopWidth: 1, borderTopColor: C.line, paddingTop: 16 }}>
-        <Text style={[S.label, { marginBottom: 10 }]}>FEATURE COMMISSION SUMMARY</Text>
-        <View style={{ flexDirection: "row", borderBottomWidth: 2, borderBottomColor: C.ink, paddingBottom: 6, marginBottom: 2 }}>
-          <Text style={[S.flex1, S.label, { marginBottom: 0 }]}>FEATURE</Text>
-          <Text style={[S.label, { marginBottom: 0, width: 60, textAlign: "right" }]}>TIER</Text>
-          <Text style={[S.label, { marginBottom: 0, width: 60, textAlign: "right" }]}>COMMISSION</Text>
+    <View style={[S.row, { gap: 6, marginTop: 10 }]}>
+      {cells.map((c) => (
+        <View key={c.label} style={{ backgroundColor: "#f0ece3", padding: 7, minWidth: 100, flex: 1 }}>
+          <Text style={[S.label, { marginBottom: 3 }]}>{c.label}</Text>
+          <Text style={{ fontFamily: "Times-Roman", fontSize: 15, color: c.valColor ?? C.ink, lineHeight: 1 }}>{c.val}</Text>
+          <Text style={[S.mut, { fontSize: 6.5, marginTop: 2 }]}>{c.sub}</Text>
         </View>
-        {featureRows.map((r) => (
-          <View key={r.id} style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: C.line, paddingVertical: 6 }}>
-            <Text style={S.flex1}>{r.name}</Text>
-            <Text style={[S.mut, { width: 60, fontSize: 9, textAlign: "right" }]}>{r.tierLabel}</Text>
-            <Text style={{ width: 60, textAlign: "right", color: r.commission > 0 ? C.gold : C.mut }}>
-              {pct(r.commission)}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </Page>
+      ))}
+    </View>
   );
 }
 
-function BreakdownPage({ payload }: { payload: PdfPayload }) {
+function Breakdown({ payload }: { payload: PdfPayload }) {
   const { computed, featureRows, contractType: ct } = payload;
   const hasMonthly = ct === "hosted" && computed.mo > 0;
 
-  return (
-    <Page size="A4" style={[S.page, { paddingTop: 0 }]}>
-      <Banner />
-      <Text style={S.redLabel}>COST BREAKDOWN</Text>
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 26, marginBottom: 18 }}>Full Cost Analysis</Text>
+  // Scale row density down as the feature count grows, so the quote keeps fitting one page.
+  const n = featureRows.length;
+  const rowPad = n > 22 ? 1.5 : n > 16 ? 2 : n > 10 ? 2.5 : 3;
+  const nameFs = n > 22 ? 7 : 8;
+  const numFs = n > 22 ? 8.5 : 9.5;
+  const finalFs = n > 22 ? 9 : 10;
 
-      {/* Table header */}
-      <View style={{ flexDirection: "row", borderBottomWidth: 2, borderBottomColor: C.ink, paddingBottom: 6, marginBottom: 2 }}>
-        <Text style={[S.flex1, S.label, { marginBottom: 0 }]}>FEATURE</Text>
-        <Text style={[S.label, { marginBottom: 0, width: 54, textAlign: "right" }]}>TIER</Text>
-        <Text style={[S.label, { marginBottom: 0, width: 60, textAlign: "right" }]}>BASE ×CX</Text>
-        <Text style={[S.label, { marginBottom: 0, width: 48, textAlign: "right" }]}>COMM.</Text>
-        <Text style={[S.label, { marginBottom: 0, width: 60, textAlign: "right" }]}>FINAL</Text>
-        {hasMonthly && <Text style={[S.label, { marginBottom: 0, width: 52, textAlign: "right" }]}>MONTHLY</Text>}
+  return (
+    <View style={{ marginTop: 10 }}>
+      <Text style={[S.redLabel, { marginBottom: 4 }]}>COST BREAKDOWN</Text>
+
+      <View style={[S.row, S.boldLine, { paddingBottom: 3 }]}>
+        <Text style={[S.flex1, S.label]}>FEATURE</Text>
+        <Text style={[S.label, { width: 44, textAlign: "right" }]}>TIER</Text>
+        <Text style={[S.label, { width: 52, textAlign: "right" }]}>BASE×CX</Text>
+        <Text style={[S.label, { width: 40, textAlign: "right" }]}>COMM.</Text>
+        <Text style={[S.label, { width: 52, textAlign: "right" }]}>FINAL</Text>
+        {hasMonthly && <Text style={[S.label, { width: 48, textAlign: "right" }]}>MO.</Text>}
       </View>
 
-      {/* Base contract */}
-      <View style={{ flexDirection: "row", backgroundColor: "#f0ece3", paddingVertical: 9, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: C.line }}>
-        <Text style={[S.flex1, { fontFamily: "Helvetica-Bold" }]}>Base Contract</Text>
-        <Text style={[S.mut, { width: 54, fontSize: 9, textAlign: "right" }]}>—</Text>
-        <Text style={{ width: 60, fontFamily: "Times-Roman", fontSize: 13, textAlign: "right" }}>{fmt(computed.bcRaw)}</Text>
-        <Text style={{ width: 48, textAlign: "right", color: computed.bcCommPct > 0 ? C.gold : C.mut }}>
+      <View style={[S.row, { alignItems: "center", backgroundColor: "#f0ece3", paddingVertical: rowPad + 0.5, paddingHorizontal: 3, borderBottomWidth: 1, borderBottomColor: C.line }]}>
+        <Text style={[S.flex1, { fontFamily: "Helvetica-Bold", fontSize: nameFs }]}>Base Contract</Text>
+        <Text style={[S.mut, { width: 44, fontSize: nameFs - 1, textAlign: "right" }]}>—</Text>
+        <Text style={{ width: 52, fontFamily: "Times-Roman", fontSize: numFs, textAlign: "right" }}>{fmt(computed.bcRaw)}</Text>
+        <Text style={{ width: 40, fontSize: nameFs - 0.5, textAlign: "right", color: computed.bcCommPct > 0 ? C.gold : C.mut }}>
           {computed.bcCommPct > 0 ? pct(computed.bcCommPct * 100) : "—"}
         </Text>
-        <Text style={{ width: 60, fontFamily: "Times-Roman", fontSize: 14, color: C.grn, textAlign: "right" }}>{fmt(computed.bc)}</Text>
+        <Text style={{ width: 52, fontFamily: "Times-Roman", fontSize: finalFs, color: C.grn, textAlign: "right" }}>{fmt(computed.bc)}</Text>
         {hasMonthly && (
-          <Text style={{ width: 52, fontSize: 9, color: C.grn, textAlign: "right" }}>
+          <Text style={{ width: 48, fontSize: nameFs - 1, color: C.grn, textAlign: "right" }}>
             {computed.moBase ? fmt(computed.moBase) + "/mo" : "—"}
           </Text>
         )}
       </View>
 
-      {/* Feature rows */}
       {featureRows.map((r) => (
-        <View key={r.id} style={{ flexDirection: "row", paddingVertical: 8, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: C.line }}>
-          <Text style={S.flex1}>{r.name}</Text>
-          <Text style={[S.mut, { width: 54, fontSize: 9, textAlign: "right" }]}>{r.tierLabel}</Text>
-          <Text style={{ width: 60, fontFamily: "Times-Roman", fontSize: 13, textAlign: "right" }}>{fmt(r.basePrice)}</Text>
-          <Text style={{ width: 48, textAlign: "right", color: r.commission > 0 ? C.gold : C.mut }}>{pct(r.commission)}</Text>
-          <Text style={{ width: 60, fontFamily: "Times-Roman", fontSize: 14, color: C.grn, textAlign: "right" }}>{fmt(r.finalPrice)}</Text>
+        <View key={r.id} style={[S.row, { alignItems: "center", paddingVertical: rowPad, paddingHorizontal: 3, borderBottomWidth: 1, borderBottomColor: C.line }]}>
+          <Text style={[S.flex1, { fontSize: nameFs }]}>{r.name}</Text>
+          <Text style={[S.mut, { width: 44, fontSize: nameFs - 1, textAlign: "right" }]}>{r.tierLabel}</Text>
+          <Text style={{ width: 52, fontFamily: "Times-Roman", fontSize: numFs, textAlign: "right" }}>{fmt(r.basePrice)}</Text>
+          <Text style={{ width: 40, fontSize: nameFs - 0.5, textAlign: "right", color: r.commission > 0 ? C.gold : C.mut }}>{pct(r.commission)}</Text>
+          <Text style={{ width: 52, fontFamily: "Times-Roman", fontSize: finalFs, color: C.grn, textAlign: "right" }}>{fmt(r.finalPrice)}</Text>
           {hasMonthly && (
-            <Text style={{ width: 52, fontSize: 9, color: C.grn, textAlign: "right" }}>
+            <Text style={{ width: 48, fontSize: nameFs - 1, color: C.grn, textAlign: "right" }}>
               {r.monthlyPrice ? fmt(r.monthlyPrice) + "/mo" : "—"}
             </Text>
           )}
         </View>
       ))}
-    </Page>
+    </View>
   );
 }
 
-function SummaryPage({ payload }: { payload: PdfPayload }) {
-  const { computed, featureRows, contractType: ct } = payload;
+function Summary({ payload }: { payload: PdfPayload }) {
+  const { computed, contractType: ct } = payload;
   const hasMonthly = ct === "hosted" && computed.mo > 0;
   const marginPct = computed.totalNoMod > 0
     ? (((computed.total - computed.totalNoMod) / computed.totalNoMod) * 100).toFixed(1)
     : "0.0";
 
+  const rows = [
+    { label: "Total before commission", val: fmt(computed.totalNoMod), valColor: C.ink },
+    {
+      label: `Commission ${computed.delta >= 0 ? "(markup)" : "(discount)"}`,
+      val: `${computed.delta >= 0 ? "+" : ""}${fmt(computed.delta)}`,
+      valColor: computed.delta >= 0 ? C.gold : C.acc,
+    },
+    {
+      label: "Effective margin",
+      val: `${parseFloat(marginPct) >= 0 ? "+" : ""}${marginPct}%`,
+      valColor: parseFloat(marginPct) >= 0 ? C.gold : C.acc,
+      bold: true,
+    },
+  ];
+
   return (
-    <Page size="A4" style={[S.page, { paddingTop: 0 }]}>
-      <Banner />
-      <Text style={S.redLabel}>FINANCIAL SUMMARY</Text>
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 26, marginBottom: 20 }}>Margin Analysis</Text>
+    <View style={{ marginTop: 10 }}>
+      <Text style={[S.redLabel, { marginBottom: 4 }]}>FINANCIAL SUMMARY</Text>
 
-      {/* Margin table */}
-      <View style={{ marginBottom: 20 }}>
-        {[
-          { label: "Total before commission", val: fmt(computed.totalNoMod), valColor: C.ink },
-          {
-            label: `Commission ${computed.delta >= 0 ? "(markup)" : "(discount)"}`,
-            val: `${computed.delta >= 0 ? "+" : ""}${fmt(computed.delta)}`,
-            valColor: computed.delta >= 0 ? C.gold : C.acc,
-          },
-          {
-            label: "Effective margin",
-            val: `${parseFloat(marginPct) >= 0 ? "+" : ""}${marginPct}%`,
-            valColor: parseFloat(marginPct) >= 0 ? C.gold : C.acc,
-            bold: true,
-          },
-        ].map((item, i) => (
-          <View key={i} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", paddingVertical: 11, borderBottomWidth: i === 2 ? 2 : 1, borderBottomColor: i === 2 ? C.ink : C.line }}>
-            <Text style={item.bold ? { fontFamily: "Helvetica-Bold" } : { color: "#4a4540" }}>{item.label}</Text>
-            <Text style={{ fontFamily: "Times-Roman", fontSize: 17, color: item.valColor }}>{item.val}</Text>
-          </View>
-        ))}
-      </View>
+      {rows.map((item, i) => (
+        <View key={i} style={[S.row, { justifyContent: "space-between", alignItems: "baseline", paddingVertical: 3, borderBottomWidth: i === 2 ? 1.5 : 1, borderBottomColor: i === 2 ? C.ink : C.line }]}>
+          <Text style={item.bold ? { fontFamily: "Helvetica-Bold", fontSize: 8 } : { color: "#4a4540", fontSize: 8 }}>{item.label}</Text>
+          <Text style={{ fontFamily: "Times-Roman", fontSize: 11, color: item.valColor }}>{item.val}</Text>
+        </View>
+      ))}
 
-      {/* Client invoice total */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", paddingVertical: 14, borderBottomWidth: hasMonthly ? 1 : 0, borderBottomColor: C.line }}>
-        <Text style={[S.label, { marginBottom: 0 }]}>CLIENT INVOICE TOTAL</Text>
-        <Text style={{ fontFamily: "Times-Roman", fontSize: 48, color: C.acc, lineHeight: 1 }}>{fmt(computed.total)}</Text>
+      <View style={[S.row, { justifyContent: "space-between", alignItems: "flex-end", paddingVertical: 8, borderBottomWidth: hasMonthly ? 1 : 0, borderBottomColor: C.line }]}>
+        <Text style={S.label}>CLIENT INVOICE TOTAL</Text>
+        <Text style={{ fontFamily: "Times-Roman", fontSize: 22, color: C.acc, lineHeight: 1 }}>{fmt(computed.total)}</Text>
       </View>
 
       {hasMonthly && (
         <>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.line }}>
-            <Text style={[S.label, { color: C.grn, marginBottom: 0 }]}>MONTHLY RETAINER</Text>
-            <Text style={{ fontFamily: "Times-Roman", fontSize: 28, color: C.grn, lineHeight: 1 }}>
-              {fmt(computed.mo)}<Text style={{ fontSize: 11 }}>/mo</Text>
+          <View style={[S.row, { justifyContent: "space-between", alignItems: "flex-end", paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: C.line }]}>
+            <Text style={[S.label, { color: C.grn }]}>MONTHLY RETAINER</Text>
+            <Text style={{ fontFamily: "Times-Roman", fontSize: 15, color: C.grn, lineHeight: 1 }}>
+              {fmt(computed.mo)}<Text style={{ fontSize: 9 }}>/mo</Text>
             </Text>
           </View>
 
-          {/* LCV table */}
-          <View style={{ marginTop: 16 }}>
-            <Text style={[S.label, { color: C.grn, marginBottom: 10 }]}>LIFETIME CUSTOMER VALUE PROJECTION</Text>
-            <View style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: C.line, paddingBottom: 6, marginBottom: 2 }}>
-              <Text style={[S.flex1, S.label, { marginBottom: 0 }]}>PERIOD</Text>
-              <Text style={[S.label, { marginBottom: 0, width: 70, textAlign: "right" }]}>RECURRING/YR</Text>
-              <Text style={[S.label, { marginBottom: 0, width: 80, textAlign: "right" }]}>CUMULATIVE</Text>
-              <Text style={[S.label, { marginBottom: 0, width: 80, textAlign: "right" }]}>TOTAL LCV</Text>
-            </View>
-            {[1, 2, 3, 4, 5].map((yr) => {
-              const recurring = computed.mo * 12 * yr;
-              const totalLcv = computed.total + recurring;
-              const isLast = yr === 5;
-              return (
-                <View key={yr} style={{ flexDirection: "row", paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: C.line, backgroundColor: isLast ? "#eef3ef" : "transparent" }}>
-                  <Text style={[S.flex1, isLast ? { fontFamily: "Helvetica-Bold" } : {}]}>Year {yr}</Text>
-                  <Text style={{ width: 70, textAlign: "right", color: C.grn, fontSize: 10 }}>{fmt(computed.mo * 12)}/yr</Text>
-                  <Text style={{ width: 80, textAlign: "right", fontFamily: "Times-Roman", fontSize: isLast ? 14 : 12, color: C.grn }}>{fmt(recurring)}</Text>
-                  <Text style={{ width: 80, textAlign: "right", fontFamily: "Times-Roman", fontSize: isLast ? 15 : 12, color: isLast ? C.grn : C.ink }}>{fmt(totalLcv)}</Text>
-                </View>
-              );
-            })}
+          <View style={[S.row, { justifyContent: "space-between", marginTop: 6 }]}>
+            {[1, 3, 5].map((yr) => (
+              <View key={yr} style={{ alignItems: "center" }}>
+                <Text style={S.label}>{yr}YR LCV</Text>
+                <Text style={{ fontFamily: "Times-Roman", fontSize: 11, color: C.grn, marginTop: 2 }}>
+                  {fmt(computed.total + computed.mo * 12 * yr)}
+                </Text>
+              </View>
+            ))}
           </View>
         </>
       )}
 
-      {/* Confidentiality */}
-      <View style={{ marginTop: 20, padding: 12, backgroundColor: "#fff5f5", borderWidth: 1, borderColor: "#f0c0c0" }}>
-        <Text style={[S.redLabel, { marginBottom: 5 }]}>⚠ CONFIDENTIALITY NOTICE</Text>
-        <Text style={{ fontSize: 10, color: "#5a3030", lineHeight: 1.7 }}>
-          This document contains internal pricing information, commission structures, and margin analysis. It must not be shared with the client or any third party.
+      <View style={{ marginTop: 10, padding: 6, backgroundColor: "#fff5f5", borderWidth: 1, borderColor: "#f0c0c0" }}>
+        <Text style={[S.redLabel, { marginBottom: 2 }]}>⚠ CONFIDENTIALITY NOTICE</Text>
+        <Text style={{ fontSize: 6.5, color: "#5a3030", lineHeight: 1.4 }}>
+          Contains internal pricing, commission structures, and margin analysis. Must not be shared with the client or any third party.
         </Text>
       </View>
-    </Page>
+    </View>
   );
 }
 
 export function InternalPdfDoc({ payload }: { payload: PdfPayload }) {
   return (
     <Document title={`INTERNAL — ${payload.quoteInfo.project || "Quote"}`} author="Jakomu Incorporated">
-      <IntCover payload={payload} />
-      <ConfigPage payload={payload} />
-      <BreakdownPage payload={payload} />
-      <SummaryPage payload={payload} />
+      <Page size="A4" style={S.page}>
+        <View wrap={false}>
+          <Header payload={payload} />
+          <ConfigStrip payload={payload} />
+          <Breakdown payload={payload} />
+          <Summary payload={payload} />
+        </View>
+      </Page>
     </Document>
   );
 }
