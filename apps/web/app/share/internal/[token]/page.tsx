@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getKV } from "@/lib/kv";
+import { getKV, setKV } from "@/lib/kv";
 import { computeQuote, fmt, cxM, trfM } from "@/lib/calc";
 import type { SavedQuote } from "@/lib/types";
 
@@ -108,6 +108,10 @@ export default async function InternalSharePage({ params }: { params: { token: s
 
   const quote = await getKV<SavedQuote>(`quote:${data.quoteId}`);
   if (!quote) notFound();
+
+  if (quote.status === "sent") {
+    setKV(`quote:${quote.id}`, { ...quote, status: "viewed" }).catch(() => {});
+  }
 
   const html = buildInternalHtml(quote);
   return <div dangerouslySetInnerHTML={{ __html: html }} />;

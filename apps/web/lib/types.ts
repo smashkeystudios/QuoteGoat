@@ -125,9 +125,12 @@ export interface SavedQuoteFeature {
   tierLabel: string;
 }
 
+export type QuoteStatus = "draft" | "sent" | "viewed";
+
 export interface SavedQuote {
   id: string;
   savedAt: string;
+  status?: QuoteStatus;
   info: QuoteInfo;
   ct: ContractType;
   cx: number;

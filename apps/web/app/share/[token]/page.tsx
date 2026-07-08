@@ -88,6 +88,10 @@ export default async function SharePage({ params }: { params: { token: string } 
   const quote = await getKV<SavedQuote>(`quote:${share.quoteId}`);
   if (!quote) notFound();
 
+  if (quote.status === "sent") {
+    setKV(`quote:${quote.id}`, { ...quote, status: "viewed" }).catch(() => {});
+  }
+
   const html = buildHtml(quote, share.expiresAt);
 
   const snapshotPath = `quotes/${quote.id}/share.html`;

@@ -99,6 +99,88 @@
   margin-top: 2px;
 }
 
+/* ── Filter tabs ── */
+.qvFilters {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0;
+  padding: 0 16px;
+}
+
+.qvFilterTab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mut);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+  margin-bottom: -1px;
+}
+.qvFilterTab:hover { color: var(--ink); }
+.qvFilterTab.active { color: var(--ink); border-bottom-color: var(--acc); }
+
+/* ── Status badge ── */
+.qvStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  user-select: none;
+}
+.qvStatus:hover { opacity: 0.8; }
+.qvStatus.draft  { background: rgba(90,85,80,0.15);  color: #8a8278; border-color: rgba(90,85,80,0.2); }
+.qvStatus.sent   { background: rgba(60,100,160,0.15); color: #6090c8; border-color: rgba(60,100,160,0.25); }
+.qvStatus.viewed { background: rgba(180,140,30,0.15); color: #c9a84c; border-color: rgba(180,140,30,0.25); }
+
+/* ── Status popover ── */
+.qvStatusPop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 30;
+  background: var(--ink);
+  border: 1px solid rgba(255,255,255,0.1);
+  min-width: 130px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  animation: qqSlide 0.15s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes qqSlide { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.qvStatusPopItem {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 9px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.qvStatusPopItem:last-child { border-bottom: none; }
+.qvStatusPopItem:hover { background: rgba(255,255,255,0.07); }
+.qvStatusPopItem.draft  { color: #8a8278; }
+.qvStatusPopItem.sent   { color: #6090c8; }
+.qvStatusPopItem.viewed { color: #c9a84c; }
+
 /* ── Internal preview modal ── */
 .previewBackdrop {
   position: fixed;

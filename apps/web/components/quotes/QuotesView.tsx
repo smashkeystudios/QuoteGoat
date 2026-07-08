@@ -1,11 +1,65 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useStore } from "@/lib/store";
-import { useQuotes, useDeleteQuote } from "@/lib/queries/useQuotes";
+import { useQuotes, useDeleteQuote, useUpdateQuoteStatus } from "@/lib/queries/useQuotes";
 import { computeQuote, fmt, cxM, trfM } from "@/lib/calc";
 import s from "@/styles/components/quotes.module.css";
 import b from "@/styles/components/builder.module.css";
-import type { SavedQuote } from "@/lib/types";
+import type { SavedQuote, QuoteStatus } from "@/lib/types";
+
+type FilterTab = "all" | "active";
+
+const STATUS_LABELS: Record<QuoteStatus, string> = {
+  draft: "Draft",
+  sent: "Sent",
+  viewed: "Viewed",
+};
+
+const ALL_STATUSES: QuoteStatus[] = ["draft", "sent", "viewed"];
+
+function StatusBadge({ quote }: { quote: SavedQuote }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { mutate: updateStatus } = useUpdateQuoteStatus();
+  const status: QuoteStatus = quote.status ?? "draft";
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
+      <button
+        className={`${s.qvStatus} ${s[status]}`}
+        onClick={() => setOpen((v) => !v)}
+        title="Change status"
+      >
+        {STATUS_LABELS[status]} ▾
+      </button>
+      {open && (
+        <div className={s.qvStatusPop}>
+          {ALL_STATUSES.map((st) => (
+            <button
+              key={st}
+              className={`${s.qvStatusPopItem} ${s[st]}`}
+              onClick={() => {
+                updateStatus({ id: quote.id, status: st });
+                setOpen(false);
+              }}
+            >
+              {STATUS_LABELS[st]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const TIER_COLORS: Record<number, string> = { 1: "#4a7c59", 2: "#7a6b3a", 3: "#6b3a4a" };
 const TIER_BG: Record<number, string>     = { 1: "#1a2e20", 2: "#2a2010", 3: "#2a1020" };
@@ -224,6 +278,7 @@ export function QuotesView() {
   const setShowShareModal = useStore((st) => st.setShowShareModal);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [preview, setPreview] = useState<SavedQuote | null>(null);
+  const [filter, setFilter] = useState<FilterTab>("all");
 
   const handleLoad = (q: SavedQuote) => {
     loadSavedQuote(q);
@@ -304,17 +359,44 @@ export function QuotesView() {
     );
   }
 
+  const filteredQuotes = quotes.filter((q) => {
+    const st = q.status ?? "draft";
+    if (filter === "active") return st === "sent" || st === "viewed";
+    return true;
+  });
+
+  const FILTER_TABS: { id: FilterTab; label: string }[] = [
+    { id: "all", label: `All (${quotes.length})` },
+    { id: "active", label: `Active (${quotes.filter((q) => q.status === "sent" || q.status === "viewed").length})` },
+  ];
+
   return (
     <>
       {preview && <InternalPreviewModal q={preview} onClose={() => setPreview(null)} />}
-      <div className={s.qvMain}>
+      <div>
         <div className={b.sh}>
           <span className={b.shNum}>—</span>
           <span className={b.shTitle}>Saved Quotes</span>
           <span className={b.shTag}>{quotes.length} quote{quotes.length !== 1 ? "s" : ""}</span>
         </div>
-        <div className={s.qvList}>
-          {quotes.map((q) => (
+        <div className={s.qvFilters}>
+          {FILTER_TABS.map((t) => (
+            <button
+              key={t.id}
+              className={`${s.qvFilterTab}${filter === t.id ? " " + s.active : ""}`}
+              onClick={() => setFilter(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className={`${s.qvMain} ${s.qvList}`}>
+          {filteredQuotes.length === 0 && (
+            <div className={s.qvEmpty} style={{ minHeight: 200 }}>
+              <div className={s.qvEmptyTitle}>No quotes here</div>
+            </div>
+          )}
+          {filteredQuotes.map((q) => (
             <div key={q.id} className={s.qvCard}>
               <div className={s.qvCardHead}>
                 <div>
@@ -325,6 +407,9 @@ export function QuotesView() {
                     {q.notes && q.notes.filter(Boolean).length > 0 && ` · ${q.notes.filter(Boolean).length} note${q.notes.filter(Boolean).length !== 1 ? "s" : ""}`}
                   </div>
                   <div className={s.qvTimestamp}>{fmtSavedAt(q.savedAt)}</div>
+                  <div style={{ marginTop: 6 }}>
+                    <StatusBadge quote={q} />
+                  </div>
                 </div>
                 <div className={s.qvTotals}>
                   <div className={s.qvTotal}>{fmt(q.computed.total)}</div>
