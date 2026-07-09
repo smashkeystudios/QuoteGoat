@@ -98,8 +98,8 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
       loadedQuoteId: q.id,
       pricingConfig: {
         ...s.pricingConfig,
-        mods: { ...q.mods },
-        baseCommission: q.baseCommission,
+        mods: { ...(q.mods ?? {}) },
+        baseCommission: q.baseCommission ?? 0,
       },
     })),
 });

@@ -9,7 +9,8 @@ import type { SavedQuote, QuoteStatus, PricingConfig } from "@/lib/types";
 
 /** Live base pricing (always current) combined with this quote's own frozen modifiers. */
 function quotePricingConfig(live: PricingConfig, q: SavedQuote): PricingConfig {
-  return { ...live, mods: q.mods, baseCommission: q.baseCommission };
+  // Quotes saved before mods/baseCommission existed fall back to empty/zero.
+  return { ...live, mods: q.mods ?? {}, baseCommission: q.baseCommission ?? 0 };
 }
 
 type FilterTab = "all" | "active";
