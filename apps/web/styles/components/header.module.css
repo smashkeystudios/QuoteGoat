@@ -1,6 +1,6 @@
 .hdr {
   border-bottom: 2px solid var(--ink);
-  padding: 20px 20px 16px;
+  padding: 6px 20px 5px 8px;
   background: var(--paper);
   position: relative;
   z-index: 3;
@@ -8,9 +8,27 @@
 
 .hdrTop {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.hdrBrand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hdrLogo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  .hdrLogo { width: 132px; height: 132px; }
 }
 
 .hdrWord {
@@ -45,6 +63,6 @@
 }
 
 @media (min-width: 900px) {
-  .hdr { padding: 28px 48px 22px; }
+  .hdr { padding: 9px 48px 8px 16px; }
   .hdrH1 { font-size: 44px; }
 }
