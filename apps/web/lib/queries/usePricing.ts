@@ -20,7 +20,7 @@ export function usePricing() {
     }
   }, [storeReady]);
 
-  return useQuery<PricingConfig>({
+  const query = useQuery<PricingConfig>({
     queryKey: ["pricing"],
     queryFn: async () => {
       const res = await fetch("/api/pricing");
@@ -30,15 +30,17 @@ export function usePricing() {
     staleTime: STALE,
     // Don't run until we know whether LS had data
     enabled: storeReady,
-    select: (data) => {
-      // If LS already had pricing config, trust it — don't overwrite with KV.
-      // pricingHydrated is set to true during the persist merge when LS had data.
-      if (!useStore.getState().pricingHydrated) {
-        setPricingConfig(data);
-      }
-      return data;
-    },
   });
+
+  // Sync the store whenever a fresh server value actually arrives (not on every
+  // render — `data` only changes reference on a genuine new fetch result), so
+  // Pricing-tab edits made elsewhere always propagate here, not just on first load.
+  useEffect(() => {
+    if (query.data) setPricingConfig(query.data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.data]);
+
+  return query;
 }
 
 export function useUpdatePricing() {

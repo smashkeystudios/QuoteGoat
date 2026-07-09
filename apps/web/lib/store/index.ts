@@ -31,16 +31,16 @@ export const useStore = create<StoreState>()(
         notes: state.notes,
         sel: Array.from(state.sel),   // Set → Array for JSON
         pricingConfig: state.pricingConfig,
+        defaultMods: state.defaultMods,
+        defaultBaseCommission: state.defaultBaseCommission,
       }),
-      // Restore sel back to a Set on hydration; mark pricing as coming from LS
+      // Restore sel back to a Set on hydration
       merge: (persisted, current) => {
         const p = persisted as Partial<StoreState> & { sel?: string[] };
         return {
           ...current,
           ...p,
           sel: new Set<string>(p.sel ?? []),
-          // True when LS had pricing data — tells usePricing not to overwrite
-          pricingHydrated: !!(p as Partial<StoreState>).pricingConfig,
         };
       },
     }

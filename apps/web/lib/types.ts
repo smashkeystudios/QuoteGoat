@@ -139,14 +139,9 @@ export interface SavedQuote {
   sel: string[];
   features: SavedQuoteFeature[];
   notes?: string[];
-  pricingSnapshot: PricingConfig;
-  computed: {
-    total: number;
-    mo: number;
-    moFinal: number;
-    bc: number;
-    delta: number;
-  };
+  /** Commission modifiers frozen at save time — the deal terms for this quote. */
+  mods: Record<string, number>;
+  baseCommission: number;
   clientPdfUrl?: string;
   internalPdfUrl?: string;
   shareHtmlUrl?: string;

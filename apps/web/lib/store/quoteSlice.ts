@@ -1,4 +1,4 @@
-import type { ContractType, QuoteInfo, Template, PricingConfig, SavedQuote } from "../types";
+import type { ContractType, QuoteInfo, Template, SavedQuote } from "../types";
 import type { StateCreator } from "zustand";
 import type { StoreState } from "./index";
 
@@ -10,6 +10,9 @@ export interface QuoteSlice {
   royalty: number;
   info: QuoteInfo;
   notes: string[];
+  /** Non-null while a saved quote's own frozen modifiers are loaded into the
+   * Builder for editing — see pricingSlice's setMod/setBaseCommission/setPricingConfig. */
+  loadedQuoteId: string | null;
 
   setCt: (ct: ContractType) => void;
   toggleFeature: (id: string) => void;
@@ -22,7 +25,7 @@ export interface QuoteSlice {
   updateNote: (idx: number, text: string) => void;
   deleteNote: (idx: number) => void;
   resetQuote: () => void;
-  loadTemplate: (tpl: Template, pricingPatch?: Partial<PricingConfig>) => void;
+  loadTemplate: (tpl: Template) => void;
   loadSavedQuote: (q: SavedQuote) => void;
 }
 
@@ -40,6 +43,7 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   royalty: 5,
   info: defaultInfo,
   notes: [],
+  loadedQuoteId: null,
 
   setCt: (ct) => set({ ct }),
   toggleFeature: (id) =>
@@ -59,16 +63,31 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
   deleteNote: (idx) =>
     set((s) => ({ notes: s.notes.filter((_, i) => i !== idx) })),
   resetQuote: () =>
-    set({ ct: "handoff", sel: new Set(), cx: 1, trf: 1, royalty: 5, info: defaultInfo, notes: [] }),
+    set((s) => ({
+      ct: "handoff", sel: new Set(), cx: 1, trf: 1, royalty: 5, info: defaultInfo, notes: [],
+      loadedQuoteId: null,
+      pricingConfig: {
+        ...s.pricingConfig,
+        mods: { ...s.defaultMods },
+        baseCommission: s.defaultBaseCommission,
+      },
+    })),
   loadTemplate: (tpl) =>
-    set({
+    set((s) => ({
       ct: tpl.ct,
       sel: new Set(tpl.features),
       cx: tpl.cx,
       trf: tpl.trf || 1,
-    }),
+      royalty: tpl.royalty ?? 0,
+      loadedQuoteId: null,
+      pricingConfig: {
+        ...s.pricingConfig,
+        mods: { ...s.defaultMods },
+        baseCommission: tpl.baseCommission,
+      },
+    })),
   loadSavedQuote: (q) =>
-    set({
+    set((s) => ({
       ct: q.ct,
       sel: new Set(q.sel),
       cx: q.cx,
@@ -76,5 +95,11 @@ export const createQuoteSlice: StateCreator<StoreState, [], [], QuoteSlice> = (s
       royalty: q.royalty ?? 5,
       info: q.info,
       notes: q.notes ?? [],
-    }),
+      loadedQuoteId: q.id,
+      pricingConfig: {
+        ...s.pricingConfig,
+        mods: { ...q.mods },
+        baseCommission: q.baseCommission,
+      },
+    })),
 });

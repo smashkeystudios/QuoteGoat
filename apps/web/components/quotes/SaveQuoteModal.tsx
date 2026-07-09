@@ -55,8 +55,8 @@ export function SaveQuoteModal() {
               tierLabel: TIER_LABELS[f?.tierId ?? 1] ?? "Tier I",
             };
           }),
-          pricingSnapshot: pricingConfig,
-          computed: { total: Q.total, mo: Q.mo, moFinal: Q.moFinal, bc: Q.bc, delta: Q.delta },
+          mods: pricingConfig.mods,
+          baseCommission: pricingConfig.baseCommission,
         }),
       });
       if (!res.ok) throw new Error("Save failed");

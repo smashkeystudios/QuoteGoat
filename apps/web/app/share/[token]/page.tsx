@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getKV, setKV } from "@/lib/kv";
 import { uploadBlob, blobExists } from "@/lib/blob";
 import { computeQuote, fmt } from "@/lib/calc";
+import { getLivePricingConfig, withQuoteModifiers } from "@/lib/pricing";
 import type { SavedQuote, ShareToken } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -92,7 +93,7 @@ export default async function SharePage({ params }: { params: { token: string } 
     setKV(`quote:${quote.id}`, { ...quote, status: "viewed" }).catch(() => {});
   }
 
-  const html = buildHtml(quote, share.expiresAt);
+  const html = await buildHtml(quote, share.expiresAt);
 
   const snapshotPath = `quotes/${quote.id}/share.html`;
   const hasSnapshot = await blobExists(snapshotPath);
@@ -109,22 +110,24 @@ export default async function SharePage({ params }: { params: { token: string } 
   return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function buildHtml(quote: SavedQuote, expiresAt: string): string {
-  const { info, ct, cx, trf, sel, features, pricingSnapshot, computed } = quote;
+async function buildHtml(quote: SavedQuote, expiresAt: string): Promise<string> {
+  const { info, ct, cx, trf, sel, features, mods, baseCommission } = quote;
   const syntheticTiers = [1, 2, 3].map((id) => ({
     id, label: `Tier ${id}`, cls: `t${id}` as "t1" | "t2" | "t3", tooltip: "",
     features: features
       .filter((f) => f.tier === id)
       .map((f) => ({ id: f.id, name: f.name, tip: f.tip ?? "", tierId: id, sortOrder: 0 })),
   }));
+  const live = await getLivePricingConfig();
+  const config = withQuoteModifiers(live, mods, baseCommission);
   const Q = computeQuote({
     ct, sel: new Set(sel), cx, trf,
-    config: pricingSnapshot,
+    config,
     tiers: syntheticTiers,
   });
 
   const ctLabel = ct === "handoff" ? "Handoff" : "Hosted Retainer";
-  const hasMonthly = ct === "hosted" && computed.mo > 0;
+  const hasMonthly = ct === "hosted" && Q.mo > 0;
   const expiryDate = new Date(expiresAt).toLocaleDateString("en-US", {
     year: "numeric", month: "long", day: "numeric",
   });
@@ -173,8 +176,8 @@ function buildHtml(quote: SavedQuote, expiresAt: string): string {
       </div>
       <div class="hero-total">
         <div class="hero-total-lbl">Total Upfront</div>
-        <div class="hero-total-amt">${fmt(computed.total)}</div>
-        ${hasMonthly ? `<div class="hero-mo-lbl">Monthly</div><div class="hero-mo">${fmt(computed.mo)}<span style="font-size:14px;color:#7a7267">/mo</span></div>` : ""}
+        <div class="hero-total-amt">${fmt(Q.total)}</div>
+        ${hasMonthly ? `<div class="hero-mo-lbl">Monthly</div><div class="hero-mo">${fmt(Q.mo)}<span style="font-size:14px;color:#7a7267">/mo</span></div>` : ""}
       </div>
     </div>
 
@@ -218,7 +221,7 @@ function buildHtml(quote: SavedQuote, expiresAt: string): string {
           <tbody>
             <tr class="base-row">
               <td><strong>Base Contract</strong></td>
-              <td class="right amt">${fmt(computed.bc)}</td>
+              <td class="right amt">${fmt(Q.bc)}</td>
             </tr>
             ${featureRows}
           </tbody>
@@ -226,13 +229,13 @@ function buildHtml(quote: SavedQuote, expiresAt: string): string {
 
         <div class="tbl-foot">
           <span class="tbl-foot-lbl">Total Upfront</span>
-          <span class="tbl-foot-amt">${fmt(computed.total)}</span>
+          <span class="tbl-foot-amt">${fmt(Q.total)}</span>
         </div>
 
         ${hasMonthly ? `
         <div class="mo-row">
           <span class="mo-lbl">Monthly Retainer</span>
-          <span class="mo-amt">${fmt(computed.mo)}<span class="mo-unit">/mo</span></span>
+          <span class="mo-amt">${fmt(Q.mo)}<span class="mo-unit">/mo</span></span>
         </div>` : ""}
       </div>
     </div>

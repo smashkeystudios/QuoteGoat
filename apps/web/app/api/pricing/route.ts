@@ -1,25 +1,18 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { getKV, setKV } from "@/lib/kv";
-import { DEF_PRICING } from "@/lib/constants";
+import { setKV } from "@/lib/kv";
+import { getLivePricingConfig, PRICING_KEY } from "@/lib/pricing";
 import type { PricingConfig } from "@/lib/types";
 
-const KEY = "pricing:config";
-
 export async function GET() {
-  let config = await getKV<PricingConfig>(KEY);
-  if (!config) {
-    config = DEF_PRICING as PricingConfig;
-    await setKV(KEY, config);
-  }
+  const config = await getLivePricingConfig();
   return NextResponse.json(config);
 }
 
 export async function PUT(req: Request) {
   const body = await req.json();
-  let config = await getKV<PricingConfig>(KEY);
-  if (!config) config = DEF_PRICING as PricingConfig;
+  const config = await getLivePricingConfig();
 
   const updated: PricingConfig = {
     ...config,
@@ -30,6 +23,6 @@ export async function PUT(req: Request) {
     ...(body.cxRate !== undefined && { cxRate: body.cxRate }),
     ...(body.trfRate !== undefined && { trfRate: body.trfRate }),
   };
-  await setKV(KEY, updated);
+  await setKV(PRICING_KEY, updated);
   return NextResponse.json(updated);
 }

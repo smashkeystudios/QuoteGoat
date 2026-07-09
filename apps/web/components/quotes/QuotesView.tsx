@@ -5,7 +5,12 @@ import { useQuotes, useDeleteQuote, useUpdateQuoteStatus } from "@/lib/queries/u
 import { computeQuote, fmt, cxM, trfM } from "@/lib/calc";
 import s from "@/styles/components/quotes.module.css";
 import b from "@/styles/components/builder.module.css";
-import type { SavedQuote, QuoteStatus } from "@/lib/types";
+import type { SavedQuote, QuoteStatus, PricingConfig } from "@/lib/types";
+
+/** Live base pricing (always current) combined with this quote's own frozen modifiers. */
+function quotePricingConfig(live: PricingConfig, q: SavedQuote): PricingConfig {
+  return { ...live, mods: q.mods, baseCommission: q.baseCommission };
+}
 
 type FilterTab = "all" | "active";
 
@@ -81,17 +86,19 @@ function buildSyntheticTiers(q: SavedQuote) {
 }
 
 function InternalPreviewModal({ q, onClose }: { q: SavedQuote; onClose: () => void }) {
+  const live = useStore((st) => st.pricingConfig);
+  const config = quotePricingConfig(live, q);
   const tiers = buildSyntheticTiers(q);
   const royalty = q.royalty ?? 0;
-  const Q = computeQuote({ ct: q.ct, sel: new Set(q.sel), cx: q.cx, trf: q.trf, royalty, config: q.pricingSnapshot, tiers });
+  const Q = computeQuote({ ct: q.ct, sel: new Set(q.sel), cx: q.cx, trf: q.trf, royalty, config, tiers });
 
   const featureMap = Object.fromEntries(q.features.map((f) => [f.id, f]));
   const hasMonthly = q.ct === "hosted" && Q.moFinal > 0;
   const ctLabel = q.ct === "handoff" ? "Handoff" : "Hosted Retainer";
   const commPctDisplay = `${(Q.bcCommPct * 100).toFixed(0)}%`;
   const effectiveMargin = Q.total > 0 ? ((Q.delta / Q.total) * 100).toFixed(1) : "0.0";
-  const cxRate = (q.pricingSnapshot.cxRate ?? 15) / 100;
-  const trfRate = (q.pricingSnapshot.trfRate ?? 20) / 100;
+  const cxRate = (config.cxRate ?? 15) / 100;
+  const trfRate = (config.trfRate ?? 20) / 100;
   const lcv = (months: number) => Q.total + Q.mo * months;
 
   return (
@@ -276,6 +283,7 @@ export function QuotesView() {
   const loadSavedQuote = useStore((st) => st.loadSavedQuote);
   const setTab = useStore((st) => st.setTab);
   const setShowShareModal = useStore((st) => st.setShowShareModal);
+  const livePricingConfig = useStore((st) => st.pricingConfig);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [preview, setPreview] = useState<SavedQuote | null>(null);
   const [filter, setFilter] = useState<FilterTab>("all");
@@ -303,7 +311,7 @@ export function QuotesView() {
         sel: new Set(q.sel),
         cx: q.cx,
         trf: q.trf,
-        config: q.pricingSnapshot,
+        config: quotePricingConfig(livePricingConfig, q),
         tiers: syntheticTiers,
       });
       const res = await fetch(`/api/pdf/${type}`, {
@@ -396,7 +404,17 @@ export function QuotesView() {
               <div className={s.qvEmptyTitle}>No quotes here</div>
             </div>
           )}
-          {filteredQuotes.map((q) => (
+          {filteredQuotes.map((q) => {
+            const Q = computeQuote({
+              ct: q.ct,
+              sel: new Set(q.sel),
+              cx: q.cx,
+              trf: q.trf,
+              royalty: q.royalty ?? 0,
+              config: quotePricingConfig(livePricingConfig, q),
+              tiers: buildSyntheticTiers(q),
+            });
+            return (
             <div key={q.id} className={s.qvCard}>
               <div className={s.qvCardHead}>
                 <div>
@@ -412,9 +430,9 @@ export function QuotesView() {
                   </div>
                 </div>
                 <div className={s.qvTotals}>
-                  <div className={s.qvTotal}>{fmt(q.computed.total)}</div>
-                  {q.ct === "hosted" && q.computed.mo > 0 && (
-                    <div className={s.qvMo}>{fmt(q.computed.mo)}/mo</div>
+                  <div className={s.qvTotal}>{fmt(Q.total)}</div>
+                  {q.ct === "hosted" && Q.mo > 0 && (
+                    <div className={s.qvMo}>{fmt(Q.mo)}/mo</div>
                   )}
                 </div>
               </div>
@@ -443,7 +461,8 @@ export function QuotesView() {
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </>

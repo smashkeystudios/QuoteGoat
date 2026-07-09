@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getKV, setKV } from "@/lib/kv";
 import { computeQuote, fmt, cxM, trfM } from "@/lib/calc";
+import { getLivePricingConfig, withQuoteModifiers } from "@/lib/pricing";
 import type { SavedQuote } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -113,12 +114,12 @@ export default async function InternalSharePage({ params }: { params: { token: s
     setKV(`quote:${quote.id}`, { ...quote, status: "viewed" }).catch(() => {});
   }
 
-  const html = buildInternalHtml(quote);
+  const html = await buildInternalHtml(quote);
   return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function buildInternalHtml(quote: SavedQuote): string {
-  const { info, ct, cx, trf, sel, features, pricingSnapshot } = quote;
+async function buildInternalHtml(quote: SavedQuote): Promise<string> {
+  const { info, ct, cx, trf, sel, features, mods, baseCommission } = quote;
   const royalty = quote.royalty ?? 0;
 
   const syntheticTiers = [1, 2, 3].map((id) => ({
@@ -128,7 +129,9 @@ function buildInternalHtml(quote: SavedQuote): string {
       .map((f) => ({ id: f.id, name: f.name, tip: f.tip ?? "", tierId: id, sortOrder: 0 })),
   }));
 
-  const Q = computeQuote({ ct, sel: new Set(sel), cx, trf, royalty, config: pricingSnapshot, tiers: syntheticTiers });
+  const live = await getLivePricingConfig();
+  const pricingConfig = withQuoteModifiers(live, mods, baseCommission);
+  const Q = computeQuote({ ct, sel: new Set(sel), cx, trf, royalty, config: pricingConfig, tiers: syntheticTiers });
 
   const ctLabel = ct === "handoff" ? "Handoff" : "Hosted Retainer";
   const hasMonthly = ct === "hosted" && Q.mo > 0;
@@ -136,8 +139,8 @@ function buildInternalHtml(quote: SavedQuote): string {
 
   const commPctDisplay = `${(Q.bcCommPct * 100).toFixed(0)}%`;
   const effectiveMargin = Q.total > 0 ? ((Q.delta / Q.total) * 100).toFixed(1) : "0.0";
-  const cxRate = (pricingSnapshot.cxRate ?? 15) / 100;
-  const trfRate = (pricingSnapshot.trfRate ?? 20) / 100;
+  const cxRate = (pricingConfig.cxRate ?? 15) / 100;
+  const trfRate = (pricingConfig.trfRate ?? 20) / 100;
   const cxLabel = cx === 1 ? "Standard (×1)" : `${cx} (×${cxM(cx, cxRate).toFixed(2)})`;
   const trfLabel = trf === 1 ? "Standard (×1)" : `${trf} (×${trfM(trf, trfRate).toFixed(2)})`;
 
@@ -374,31 +377,31 @@ function buildInternalHtml(quote: SavedQuote): string {
       <!-- Right: Pricing config snapshot -->
       <div>
         <div class="panel">
-          <div class="panel-lbl">Pricing Snapshot</div>
+          <div class="panel-lbl">Current Pricing</div>
           <div class="meta-row">
             <div class="meta-row-lbl">Handoff Base</div>
-            <div class="meta-row-val">${fmt(pricingSnapshot.handoff.base)}</div>
+            <div class="meta-row-val">${fmt(pricingConfig.handoff.base)}</div>
           </div>
           <div class="meta-row">
             <div class="meta-row-lbl">Handoff T1 / T2 / T3</div>
-            <div class="meta-row-val">${fmt(pricingSnapshot.handoff.tier1)} / ${fmt(pricingSnapshot.handoff.tier2)} / ${fmt(pricingSnapshot.handoff.tier3)}</div>
+            <div class="meta-row-val">${fmt(pricingConfig.handoff.tier1)} / ${fmt(pricingConfig.handoff.tier2)} / ${fmt(pricingConfig.handoff.tier3)}</div>
           </div>
           ${ct === "hosted" ? `
           <div class="meta-row">
             <div class="meta-row-lbl">Hosted Base</div>
-            <div class="meta-row-val">${fmt(pricingSnapshot.hosted.base)}</div>
+            <div class="meta-row-val">${fmt(pricingConfig.hosted.base)}</div>
           </div>
           <div class="meta-row">
             <div class="meta-row-lbl">Hosted T1 / T2 / T3</div>
-            <div class="meta-row-val">${fmt(pricingSnapshot.hosted.tier1)} / ${fmt(pricingSnapshot.hosted.tier2)} / ${fmt(pricingSnapshot.hosted.tier3)}</div>
+            <div class="meta-row-val">${fmt(pricingConfig.hosted.tier1)} / ${fmt(pricingConfig.hosted.tier2)} / ${fmt(pricingConfig.hosted.tier3)}</div>
           </div>
           <div class="meta-row">
             <div class="meta-row-lbl">Mo Base / T1 / T2 / T3</div>
-            <div class="meta-row-val">${fmt(pricingSnapshot.hosted.moBase)} / ${fmt(pricingSnapshot.hosted.mo1)} / ${fmt(pricingSnapshot.hosted.mo2)} / ${fmt(pricingSnapshot.hosted.mo3)}</div>
+            <div class="meta-row-val">${fmt(pricingConfig.hosted.moBase)} / ${fmt(pricingConfig.hosted.mo1)} / ${fmt(pricingConfig.hosted.mo2)} / ${fmt(pricingConfig.hosted.mo3)}</div>
           </div>` : ""}
           <div class="meta-row">
             <div class="meta-row-lbl">Base Commission</div>
-            <div class="meta-row-val acc">${pricingSnapshot.baseCommission}%</div>
+            <div class="meta-row-val acc">${pricingConfig.baseCommission}%</div>
           </div>
         </div>
 

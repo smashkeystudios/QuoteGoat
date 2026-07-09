@@ -67,8 +67,8 @@ export function QuotePanel() {
           ct, cx, trf, royalty,
           sel: Q.arr,
           features: buildFeatureSnapshot(),
-          pricingSnapshot: pricingConfig,
-          computed: { total: Q.total, mo: Q.mo, moFinal: Q.moFinal, bc: Q.bc, delta: Q.delta },
+          mods: pricingConfig.mods,
+          baseCommission: pricingConfig.baseCommission,
         }),
       });
       if (!res.ok) return null;
@@ -113,7 +113,7 @@ export function QuotePanel() {
   }, [shareQuoteId, setShowShareModal, setShowSaveQuoteModal]);
 
   const handleClear = useCallback(() => {
-    if (confirm("Clear this quote? This resets features, client details, and notes.")) {
+    if (confirm("Clear this quote? This resets features, client details, notes, and modifiers back to your current defaults.")) {
       resetQuote();
     }
   }, [resetQuote]);
@@ -234,7 +234,7 @@ export function QuotePanel() {
           </button>
         </div>
 
-        {/* Save + Share buttons */}
+        {/* Save + Clear buttons */}
         <div className={s.qBtns} style={{ marginTop: 8 }}>
           <button
             className={`${s.qbtn} ${s.qbtnI}`}
@@ -243,20 +243,20 @@ export function QuotePanel() {
             Save Quote
           </button>
           <button
-            className={`${s.qbtn} ${s.qbtnI}`}
-            onClick={handleShare}
-          >
-            Share Link
-          </button>
-        </div>
-
-        {/* Clear */}
-        <div className={s.qBtns} style={{ marginTop: 8 }}>
-          <button
             className={`${s.qbtn} ${s.qbtnD}`}
             onClick={handleClear}
           >
             Clear Quote
+          </button>
+        </div>
+
+        {/* Share */}
+        <div className={s.qBtns} style={{ marginTop: 8 }}>
+          <button
+            className={`${s.qbtn} ${s.qbtnI}`}
+            onClick={handleShare}
+          >
+            Share Link
           </button>
         </div>
       </div>

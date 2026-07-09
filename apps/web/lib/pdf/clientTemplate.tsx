@@ -108,7 +108,7 @@ function Investment({ payload }: { payload: PdfPayload }) {
           <View style={[S.row, { justifyContent: "space-between", alignItems: "flex-end", borderTopWidth: 1, borderTopColor: C.line, paddingTop: 6, marginTop: 6 }]}>
             <Text style={[S.label, { color: C.grn }]}>MONTHLY RETAINER</Text>
             <Text style={{ fontFamily: "Times-Roman", fontSize: 15, color: C.grn, lineHeight: 1 }}>
-              {fmt(computed.moFinal)}<Text style={{ fontSize: 9 }}>/mo</Text>
+              {fmt(computed.mo)}<Text style={{ fontSize: 9 }}>/mo</Text>
             </Text>
           </View>
         )}
@@ -120,7 +120,7 @@ function Investment({ payload }: { payload: PdfPayload }) {
             <View key={yr} style={{ alignItems: "center" }}>
               <Text style={S.label}>{yr}YR LCV</Text>
               <Text style={{ fontFamily: "Times-Roman", fontSize: 11, color: C.grn, marginTop: 2 }}>
-                {fmt(computed.total + computed.moFinal * 12 * yr)}
+                {fmt(computed.total + computed.mo * 12 * yr)}
               </Text>
             </View>
           ))}

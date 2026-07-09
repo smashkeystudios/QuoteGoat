@@ -26,8 +26,8 @@ export async function POST(req: Request) {
     sel: body.sel,
     features: body.features ?? [],
     notes: body.notes ?? [],
-    pricingSnapshot: body.pricingSnapshot,
-    computed: { ...body.computed, moFinal: body.computed?.moFinal ?? body.computed?.mo ?? 0 },
+    mods: body.mods ?? {},
+    baseCommission: body.baseCommission ?? 0,
   };
   await setKV(`quote:${id}`, quote);
   await prependToList("quotes:index", id);
